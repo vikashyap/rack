@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "react";
+import { useEffect } from "react";
 
 import type { DeviceTemplateConfig } from "@repo/config";
 import { AppShell } from "@repo/ui";
@@ -13,8 +13,6 @@ import { useRackInteractionStore } from "../stores/rackInteractionStore";
 const EMPTY_DEVICE_TEMPLATES: DeviceTemplateConfig[] = [];
 
 export function AppFramePage() {
-  const rackViewportRef = useRef<HTMLElement | null>(null);
-
   const devicesQuery = useDevicesQuery();
   const rackDevicesQuery = useRackDevicesQuery();
   const templates = devicesQuery.data ?? EMPTY_DEVICE_TEMPLATES;
@@ -23,12 +21,11 @@ export function AppFramePage() {
     devices,
     removeDevice,
   } = useRackPlacement({
-    rackViewportRef,
     templates,
     initialDevices: rackDevicesQuery.data ?? [],
   });
 
-  const theme = useRackInteractionStore((state) => state.theme);
+  const theme = useRackInteractionStore((state) => state.interaction.theme);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -44,12 +41,12 @@ export function AppFramePage() {
       <div className="grid h-full min-h-0 grid-cols-[minmax(220px,1fr)_minmax(360px,2fr)_minmax(220px,1fr)] gap-4 px-4 py-4">
         <DeviceFrame
           templates={templates}
+          devices={devices}
         />
 
         <RackFramePanel
           devices={devices}
           onRemoveDevice={removeDevice}
-          rackViewportRef={rackViewportRef}
         />
         <CollaborationPanel />
       </div>

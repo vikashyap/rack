@@ -1,147 +1,89 @@
-import { useCallback, useEffect, useState, type RefObject } from "react";
+import { useEffect, useMemo } from "react";
 
 import type { DeviceTemplateConfig } from "@repo/config";
 
 import {
-  canPlaceRackDevice,
-  getStartUFromClientY,
+  createRackDeviceRecord,
+  resolveRackDevices,
   type RackDevice,
-  type RackDevicePreview,
+  type RackDeviceRecord,
 } from "../lib/rack-placement";
+import { useRackDocumentStore } from "../stores/rackDocumentStore";
 import { useRackInteractionStore } from "../stores/rackInteractionStore";
 
 type UseRackPlacementArgs = {
-  rackViewportRef: RefObject<HTMLElement | null>;
   templates: DeviceTemplateConfig[];
   initialDevices: RackDevice[];
 };
 
-const rackHeight = 42;
+function isDefined<T>(value: T | null | undefined): value is T {
+  return value !== null && value !== undefined;
+}
 
 export function useRackPlacement({
-  rackViewportRef,
   templates,
   initialDevices,
 }: UseRackPlacementArgs) {
-  const [devices, setDevices] = useState<RackDevice[]>(initialDevices);
-  const activeDrag = useRackInteractionStore((state) => state.activeDrag);
-  const mousePoint = useRackInteractionStore((state) => state.mousePoint);
-  const lastDrop = useRackInteractionStore((state) => state.lastDrop);
-  const view = useRackInteractionStore((state) => state.view);
-  const preview = useRackInteractionStore((state) => state.preview);
-  const setPreview = useRackInteractionStore((state) => state.setPreview);
-  const clearDrop = useRackInteractionStore((state) => state.clearDrop);
+  const deviceIds = useRackDocumentStore((state) => state.document.deviceIds);
+  const devicesById = useRackDocumentStore((state) => state.document.devicesById);
+  const seedDocument = useRackDocumentStore((state) => state.seedDocument);
+  const removeDeviceFromDocument = useRackDocumentStore((state) => state.removeDevice);
+  const removeConnectionsForDevice = useRackDocumentStore(
+    (state) => state.removeConnectionsForDevice,
+  );
 
   useEffect(() => {
-    setDevices(initialDevices);
-  }, [initialDevices]);
-
-  useEffect(() => {
-    if (!activeDrag || !mousePoint) {
-      setPreview(null);
+    if (deviceIds.length > 0 || initialDevices.length === 0) {
       return;
     }
 
-    const source =
-      activeDrag.kind === "template"
-        ? templates.find((template) => template.id === activeDrag.id) ?? null
-        : devices.find((device) => device.id === activeDrag.id) ?? null;
-
-    if (!source) {
-      setPreview(null);
-      return;
-    }
-
-    const rackSvg = rackViewportRef.current?.querySelector("svg");
-
-    if (!rackSvg) {
-      setPreview(null);
-      return;
-    }
-
-    const rackRect = rackSvg.getBoundingClientRect();
-    const startU = getStartUFromClientY({
-      clientY: mousePoint.y,
-      rackTop: rackRect.top,
-      rackRenderedHeight: rackRect.height,
-      rackHeight,
-    });
-
-    const candidate: RackDevicePreview = {
-      ...source,
-      startU,
-      view,
-      isValid: canPlaceRackDevice(devices, { ...source, startU, view }, rackHeight),
-    };
-
-    setPreview(candidate);
-  }, [activeDrag, devices, mousePoint, rackHeight, rackViewportRef, setPreview, templates, view]);
-
-  useEffect(() => {
-    if (!lastDrop) {
-      return;
-    }
-
-    const source =
-      lastDrop.item.kind === "template"
-        ? templates.find((template) => template.id === lastDrop.item.id) ?? null
-        : devices.find((device) => device.id === lastDrop.item.id) ?? null;
-
-    if (!source) {
-      clearDrop();
-      return;
-    }
-
-    const rackSvg = rackViewportRef.current?.querySelector("svg");
-
-    if (!rackSvg) {
-      clearDrop();
-      return;
-    }
-
-    const rackRect = rackSvg.getBoundingClientRect();
-    const startU = getStartUFromClientY({
-      clientY: lastDrop.point.y,
-      rackTop: rackRect.top,
-      rackRenderedHeight: rackRect.height,
-      rackHeight,
-    });
-
-    const candidate = { ...source, startU, view };
-
-    if (!canPlaceRackDevice(devices, candidate, rackHeight)) {
-      clearDrop();
-      return;
-    }
-
-    setDevices((current) =>
-      lastDrop.item.kind === "template"
-        ? [
-            ...current,
-            {
-              ...source,
-              id: crypto.randomUUID(),
-              startU,
-              view,
-            },
-          ]
-        : current.map((device) =>
-            device.id === source.id ? { ...device, startU } : device,
-          ),
+    const records = initialDevices.map<RackDeviceRecord>((device) =>
+      createRackDeviceRecord(
+        {
+          templateKey: device.templateKey,
+          startU: device.startU,
+          view: device.view,
+        },
+        device.id,
+      ),
     );
 
-    setPreview(null);
-    clearDrop();
-  }, [clearDrop, devices, lastDrop, rackHeight, rackViewportRef, setPreview, templates, view]);
+    seedDocument(records);
+  }, [deviceIds.length, initialDevices, seedDocument]);
 
-  const removeDevice = useCallback((deviceId: string) => {
-    setDevices((current) => current.filter((device) => device.id !== deviceId));
-    setPreview(null);
-  }, [setPreview]);
+  const devices = useMemo(
+    () =>
+      resolveRackDevices(
+        deviceIds.map((deviceId) => devicesById[deviceId]).filter(isDefined),
+        templates,
+      ),
+    [deviceIds, devicesById, templates],
+  );
+
+  function removeDevice(deviceId: string) {
+    removeDeviceFromDocument(deviceId);
+    removeConnectionsForDevice(deviceId);
+
+    const interaction = useRackInteractionStore.getState();
+
+    if (
+      interaction.interaction.activeDrag?.kind === "rack-device" &&
+      interaction.interaction.activeDrag.id === deviceId
+    ) {
+      interaction.clearDrag();
+    }
+
+    if (interaction.interaction.activeConnection?.deviceId === deviceId) {
+      interaction.cancelConnection();
+    }
+  }
+
+  useEffect(() => {
+    console.log("[rack:document] rack devices snapshot", devices);
+  }, [devices]);
 
   return {
     devices,
-    preview,
     removeDevice,
   };
 }

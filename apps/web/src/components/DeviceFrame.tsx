@@ -1,36 +1,28 @@
-import { memo, useMemo } from "react";
+import { memo } from "react";
 
 import type { DeviceTemplateConfig } from "@repo/config";
 import { DeviceTemplate, Panel } from "@repo/ui";
 
-import { useGestureDrag, type GesturePoint } from "../hooks";
-import { useRackInteractionStore } from "../stores/rackInteractionStore";
+import { useRackDrag } from "../hooks";
+import type { RackDevice } from "../lib/rack-placement";
 
 interface DeviceFrameProps {
   templates: DeviceTemplateConfig[];
+  devices: RackDevice[];
 }
 
 const DeviceCard = memo(function DeviceCard({
   template,
+  templates,
+  devices,
 }: {
   template: DeviceTemplateConfig;
+  templates: DeviceTemplateConfig[];
+  devices: RackDevice[];
 }) {
-  const startDrag = useRackInteractionStore((state) => state.startDrag);
-  const moveDrag = useRackInteractionStore((state) => state.moveDrag);
-  const endDrag = useRackInteractionStore((state) => state.endDrag);
-
-  const dragHandlers = useMemo(
-    () => ({
-      onDragStart: startDrag,
-      onDragMove: (_: unknown, point: GesturePoint) => moveDrag(point),
-      onDragEnd: (_: unknown, point: GesturePoint) => endDrag(point),
-    }),
-    [endDrag, moveDrag, startDrag],
-  );
-
-  const bind = useGestureDrag(
-    { kind: "template" as const, id: template.id },
-    dragHandlers,
+  const bind = useRackDrag(
+    { kind: "template", id: template.id },
+    { templates, devices },
   );
 
   return (
@@ -52,7 +44,10 @@ const DeviceCard = memo(function DeviceCard({
   );
 });
 
-export const DeviceFrame = memo(function DeviceFrame({ templates }: DeviceFrameProps) {
+export const DeviceFrame = memo(function DeviceFrame({
+  templates,
+  devices,
+}: DeviceFrameProps) {
   return (
     <Panel tone="muted" className="min-h-0 overflow-auto">
       <Panel.Header>
@@ -64,7 +59,12 @@ export const DeviceFrame = memo(function DeviceFrame({ templates }: DeviceFrameP
 
       <Panel.Body className="grid gap-2">
         {templates.map((template) => (
-          <DeviceCard key={template.id} template={template} />
+          <DeviceCard
+            key={template.id}
+            template={template}
+            templates={templates}
+            devices={devices}
+          />
         ))}
       </Panel.Body>
     </Panel>

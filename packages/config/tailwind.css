@@ -28,6 +28,8 @@
   --color-ui-control-value-color: var(--ui-control-value-color);
   --color-ui-port-shell-bg: var(--ui-port-shell-bg);
   --color-ui-port-shell-border: var(--ui-port-shell-border);
+  --color-ui-wire-stroke: var(--ui-wire-stroke);
+  --color-ui-wire-glow: var(--ui-wire-glow);
   --color-ui-rack-header-bg: var(--ui-rack-header-bg);
   --color-ui-rack-viewport-bg: var(--ui-rack-viewport-bg);
   --color-ui-rack-viewport-border: var(--ui-rack-viewport-border);
@@ -103,6 +105,8 @@
     --ui-port-shell-bg: rgba(2, 6, 23, 0.64);
     --ui-port-shell-border: rgba(255, 255, 255, 0.1);
     --ui-port-shell-shadow: 0 10px 18px rgba(2, 6, 23, 0.14);
+    --ui-wire-stroke: rgba(251, 146, 60, 0.92);
+    --ui-wire-glow: rgba(251, 146, 60, 0.28);
 
     --ui-surface-accent: rgba(255, 255, 255, 0.06);
     --ui-status-online: #10b981;
@@ -203,6 +207,8 @@
 
     --ui-port-shell-bg: rgba(255, 255, 255, 0.94);
     --ui-port-shell-border: rgba(15, 23, 42, 0.12);
+    --ui-wire-stroke: rgba(249, 115, 22, 0.78);
+    --ui-wire-glow: rgba(249, 115, 22, 0.16);
 
     --ui-rack-rail-base: #cbd5e1;
     --ui-rack-rail-overlay: rgba(255, 255, 255, 0.72);

@@ -2,6 +2,8 @@ import type { DeviceTemplateComponent, DeviceTemplateKey } from "@repo/config";
 
 export type DeviceTemplateLoader = () => Promise<{ default: DeviceTemplateComponent }>;
 
+export * from "./lib/device-port-layout";
+
 export const deviceTemplateLoaders = {
   "server-default": () =>
     import("./device-templates/ServerDeviceTemplate").then((module) => ({

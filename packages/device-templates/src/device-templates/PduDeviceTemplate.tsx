@@ -5,7 +5,7 @@ import {
   type DeviceTemplateProps,
 } from "@repo/config";
 import { DevicePorts } from "../components/DevicePorts";
-import { resolveTemplatePorts } from "../lib/resolvePorts";
+import { resolveDevicePortLayout } from "../lib/device-port-layout";
 
 export function PduDeviceTemplate({
   template,
@@ -17,13 +17,9 @@ export function PduDeviceTemplate({
   classNames,
   ...props
 }: DeviceTemplateProps) {
-  const height = template.uHeight * uHeight;
   const compact = density === "compact";
-  const visiblePorts = resolveTemplatePorts(template).slice(0, compact ? 4 : 8);
-  const outletSize = compact ? 15 : 18;
-  const outletGap = compact ? 18 : 32;
-  const portHeight = compact ? 12 : 14;
-  const outletY = compact ? height + 6 : height - portHeight - 6;
+  const layout = resolveDevicePortLayout(template, width, uHeight, density);
+  const height = template.uHeight * uHeight;
 
   return (
     <g className={className} data-category={template.category} {...props}>
@@ -79,11 +75,7 @@ export function PduDeviceTemplate({
       </text>
 
       <DevicePorts
-        ports={visiblePorts}
-        startX={width - 12}
-        gap={outletGap}
-        portY={outletY}
-        portWidth={outletSize}
+        layout={layout}
         density={density}
         classNames={classNames}
       />

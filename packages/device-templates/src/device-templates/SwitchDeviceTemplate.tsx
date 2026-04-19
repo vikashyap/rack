@@ -5,7 +5,7 @@ import {
   type DeviceTemplateProps,
 } from "@repo/config";
 import { DevicePorts } from "../components/DevicePorts";
-import { resolveTemplatePorts } from "../lib/resolvePorts";
+import { resolveDevicePortLayout } from "../lib/device-port-layout";
 
 export function SwitchDeviceTemplate({
   template,
@@ -17,13 +17,9 @@ export function SwitchDeviceTemplate({
   classNames,
   ...props
 }: DeviceTemplateProps) {
-  const height = template.uHeight * uHeight;
   const compact = density === "compact";
-  const visiblePorts = resolveTemplatePorts(template).slice(0, compact ? 6 : 12);
-  const portSize = compact ? 15 : 18;
-  const portGap = compact ? 18 : 30;
-  const portHeight = compact ? 12 : 14;
-  const portY = compact ? height + 6 : height - portHeight - 6;
+  const layout = resolveDevicePortLayout(template, width, uHeight, density);
+  const height = template.uHeight * uHeight;
 
   return (
     <g className={className} data-category={template.category} {...props}>
@@ -79,11 +75,7 @@ export function SwitchDeviceTemplate({
       </text>
 
       <DevicePorts
-        ports={visiblePorts}
-        startX={width - 14}
-        gap={portGap}
-        portY={portY}
-        portWidth={portSize}
+        layout={layout}
         density={density}
         classNames={classNames}
       />

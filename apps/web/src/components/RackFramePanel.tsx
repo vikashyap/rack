@@ -1,20 +1,21 @@
 import { memo } from "react";
-import type { RefObject } from "react";
 
 import { Panel, RackFrame, ControlGroup } from "@repo/ui";
 
 import type { RackDevice } from "../lib/rack-placement";
+import { RackDropZones } from "./RackDropZones";
+import { RackWires } from "./RackWires";
 import { RackDevices } from "./RackDevices";
 import {
   RACK_MAX_ZOOM,
   RACK_MIN_ZOOM,
   useRackInteractionStore,
 } from "../stores/rackInteractionStore";
+import { useRackWireInteractions } from "../hooks";
 
 interface RackFramePanelProps {
   devices: RackDevice[];
   onRemoveDevice: (deviceId: string) => void;
-  rackViewportRef: RefObject<HTMLElement | null>;
 }
 
 const rackLayout = {
@@ -31,9 +32,9 @@ const rackStyles = {
 } as const;
 
 const RackHeaderControls = memo(function RackHeaderControls() {
-  const view = useRackInteractionStore((state) => state.view);
-  const zoom = useRackInteractionStore((state) => state.zoom);
-  const theme = useRackInteractionStore((state) => state.theme);
+  const view = useRackInteractionStore((state) => state.interaction.view);
+  const zoom = useRackInteractionStore((state) => state.interaction.zoom);
+  const theme = useRackInteractionStore((state) => state.interaction.theme);
   const setView = useRackInteractionStore((state) => state.setView);
   const zoomIn = useRackInteractionStore((state) => state.zoomIn);
   const zoomOut = useRackInteractionStore((state) => state.zoomOut);
@@ -70,22 +71,24 @@ const RackHeaderControls = memo(function RackHeaderControls() {
 const RackViewport = memo(function RackViewport({
   devices,
   onRemoveDevice,
-  rackViewportRef,
 }: {
   devices: RackDevice[];
   onRemoveDevice: (deviceId: string) => void;
-  rackViewportRef: RefObject<HTMLElement | null>;
 }) {
-  const view = useRackInteractionStore((state) => state.view);
-  const zoom = useRackInteractionStore((state) => state.zoom);
+  const view = useRackInteractionStore((state) => state.interaction.view);
+  const zoom = useRackInteractionStore((state) => state.interaction.zoom);
 
   const totalHeight = rackLayout.rackHeight * rackLayout.uHeight;
+  const {
+    handleCanvasClickCapture,
+    handleCanvasPointerMoveCapture,
+    handleCanvasPointerLeaveCapture,
+  } = useRackWireInteractions();
 
   return (
     <RackFrame.Viewport>
       <div className={rackStyles.viewportOuter}>
         <Panel
-          ref={rackViewportRef}
           tone="muted"
           className="w-full max-w-[48rem] p-4 transition-[max-width,width] duration-200 sm:p-6"
           style={{
@@ -97,6 +100,9 @@ const RackViewport = memo(function RackViewport({
             uHeight={rackLayout.uHeight}
             width={rackLayout.width}
             view={view}
+            onClickCapture={handleCanvasClickCapture}
+            onPointerMoveCapture={handleCanvasPointerMoveCapture}
+            onPointerLeaveCapture={handleCanvasPointerLeaveCapture}
           >
             <RackFrame.Background width={rackLayout.width} totalHeight={totalHeight} />
             <RackFrame.Rails width={rackLayout.width} totalHeight={totalHeight} railWidth={rackLayout.railWidth} />
@@ -106,6 +112,19 @@ const RackViewport = memo(function RackViewport({
               width={rackLayout.width}
               railWidth={rackLayout.railWidth}
               mountHoleRadius={3}
+            />
+            <RackDropZones
+              rackHeight={rackLayout.rackHeight}
+              uHeight={rackLayout.uHeight}
+              width={rackLayout.width}
+              railWidth={rackLayout.railWidth}
+            />
+            <RackWires
+              rackHeight={rackLayout.rackHeight}
+              uHeight={rackLayout.uHeight}
+              width={rackLayout.width}
+              railWidth={rackLayout.railWidth}
+              devices={devices}
             />
             <RackDevices
               rackHeight={rackLayout.rackHeight}
@@ -126,7 +145,6 @@ const RackViewport = memo(function RackViewport({
 export const RackFramePanel = memo(function RackFramePanel({
   devices,
   onRemoveDevice,
-  rackViewportRef,
 }: RackFramePanelProps) {
   return (
     <RackFrame className={rackStyles.outer}>
@@ -134,7 +152,6 @@ export const RackFramePanel = memo(function RackFramePanel({
       <RackViewport
         devices={devices}
         onRemoveDevice={onRemoveDevice}
-        rackViewportRef={rackViewportRef}
       />
     </RackFrame>
   );

@@ -1,8 +1,8 @@
-import { memo, useCallback, useMemo, type MouseEvent } from "react";
+import { memo, type MouseEvent } from "react";
 
 import { DeviceTemplate } from "@repo/ui";
 
-import { useGestureDrag, type GesturePoint } from "../hooks";
+import { useRackDrag } from "../hooks";
 import type { RackDevice } from "../lib/rack-placement";
 import { useRackInteractionStore } from "../stores/rackInteractionStore";
 
@@ -21,6 +21,7 @@ const RackDeviceItem = memo(function RackDeviceItem({
   uHeight,
   width,
   railWidth,
+  devices,
   onRemoveDevice,
 }: {
   device: RackDevice;
@@ -28,40 +29,28 @@ const RackDeviceItem = memo(function RackDeviceItem({
   uHeight: number;
   width: number;
   railWidth: number;
+  devices: RackDevice[];
   onRemoveDevice: (deviceId: string) => void;
 }) {
   const deviceWidth = width - railWidth * 2;
   const y = (rackHeight - (device.startU + device.uHeight - 1)) * uHeight;
-  const activeDrag = useRackInteractionStore((state) => state.activeDrag);
+  const activeDrag = useRackInteractionStore((state) => state.interaction.activeDrag);
   const active = activeDrag?.kind === "rack-device" && activeDrag.id === device.id;
-
-  const startDrag = useRackInteractionStore((state) => state.startDrag);
-  const moveDrag = useRackInteractionStore((state) => state.moveDrag);
-  const endDrag = useRackInteractionStore((state) => state.endDrag);
-
-  const dragHandlers = useMemo(
-    () => ({
-      onDragStart: startDrag,
-      onDragMove: (_: unknown, point: GesturePoint) => moveDrag(point),
-      onDragEnd: (_: unknown, point: GesturePoint) => endDrag(point),
-    }),
-    [endDrag, moveDrag, startDrag],
+  const bind = useRackDrag(
+    { kind: "rack-device", id: device.id },
+    { templates: devices, devices },
   );
 
-  const bind = useGestureDrag({ kind: "rack-device" as const, id: device.id }, dragHandlers);
-
-  const handleDoubleClick = useCallback(
-    (event: MouseEvent<SVGGElement>) => {
-      event.stopPropagation();
-      onRemoveDevice(device.id);
-    },
-    [device.id, onRemoveDevice],
-  );
+  function handleDoubleClick(event: MouseEvent<SVGGElement>) {
+    event.stopPropagation();
+    onRemoveDevice(device.id);
+  }
 
   return (
     <g
       {...bind()}
       onDoubleClick={handleDoubleClick}
+      data-device-id={device.id}
       transform={`translate(${railWidth}, ${y})`}
       style={{
         cursor: active ? "grabbing" : "grab",
@@ -82,11 +71,8 @@ export const RackDevices = memo(function RackDevices({
   devices,
   onRemoveDevice,
 }: RackDevicesProps) {
-  const view = useRackInteractionStore((state) => state.view);
-  const visibleDevices = useMemo(
-    () => devices.filter((device) => device.view === view),
-    [devices, view],
-  );
+  const view = useRackInteractionStore((state) => state.interaction.view);
+  const visibleDevices = devices.filter((device) => device.view === view);
 
   return (
     <g>
@@ -98,6 +84,7 @@ export const RackDevices = memo(function RackDevices({
             uHeight={uHeight}
             width={width}
             railWidth={railWidth}
+            devices={devices}
             onRemoveDevice={onRemoveDevice}
           />
         ))}

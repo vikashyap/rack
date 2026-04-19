@@ -1,4 +1,4 @@
-import { memo, useMemo } from "react";
+import { memo } from "react";
 import { DeviceTemplate } from "@repo/ui";
 import { type DeviceTemplateConfig } from "@repo/config";
 import { useRackInteractionStore } from "../stores/rackInteractionStore";
@@ -14,21 +14,15 @@ export const RackDragOverlay = memo(function RackDragOverlay({
   templates,
   devices,
 }: RackDragOverlayProps) {
-  const activeDrag = useRackInteractionStore((state) => state.activeDrag);
-  const point = useRackInteractionStore((state) => state.mousePoint);
-  const preview = useRackInteractionStore((state) => state.preview);
+  const activeDrag = useRackInteractionStore((state) => state.interaction.activeDrag);
+  const point = useRackInteractionStore((state) => state.interaction.mousePoint);
+  const preview = useRackInteractionStore((state) => state.interaction.preview);
 
-  const item = useMemo(() => {
-    if (!activeDrag) {
-      return null;
-    }
-
-    if (activeDrag.kind === "template") {
-      return templates.find((template) => template.id === activeDrag.id) ?? null;
-    }
-
-    return devices.find((device) => device.id === activeDrag.id) ?? null;
-  }, [activeDrag, devices, templates]);
+  const item = activeDrag
+    ? activeDrag.kind === "template"
+      ? templates.find((template) => template.id === activeDrag.id) ?? null
+      : devices.find((device) => device.id === activeDrag.id) ?? null
+    : null;
 
   if (!item || !point) return null;
 
