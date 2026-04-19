@@ -1,0 +1,28 @@
+{
+  "name": "@repo/ui",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./app-shell": "./src/AppShell.tsx",
+    "./device-template": "./src/DeviceTemplate.tsx",
+    "./rack-frame": "./src/RackFrame.tsx",
+    "./panel": "./src/Panel.tsx",
+    "./control-group": "./src/ControlGroup.tsx"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "19.1.12",
+    "@types/react-dom": "19.1.9",
+    "typescript": "5.9.2"
+  },
+  "dependencies": {
+    "@repo/config": "workspace:*",
+    "@repo/device-templates": "workspace:*",
+    "tailwind-merge": "^3.5.0"
+  }
+}
