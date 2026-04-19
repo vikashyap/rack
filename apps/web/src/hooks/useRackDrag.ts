@@ -1,4 +1,5 @@
 import type { DeviceTemplateConfig } from "@repo/config";
+import { useShallow } from "zustand/react/shallow";
 
 import type { RackDevice } from "../lib/rack-placement";
 import {
@@ -13,9 +14,13 @@ type RackDragSources = {
 };
 
 export function useRackDrag(item: RackDragItem, sources: RackDragSources) {
-  const startDrag = useRackInteractionStore((state) => state.startDrag);
-  const moveDrag = useRackInteractionStore((state) => state.moveDrag);
-  const endDrag = useRackInteractionStore((state) => state.endDrag);
+  const { endDrag, moveDrag, startDrag } = useRackInteractionStore(
+    useShallow((state) => ({
+      endDrag: state.endDrag,
+      moveDrag: state.moveDrag,
+      startDrag: state.startDrag,
+    })),
+  );
 
   return useGestureDrag(item, {
     onDragStart: startDrag,

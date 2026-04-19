@@ -18,7 +18,7 @@ export const RackWires = memo(function RackWires({
   railWidth,
   devices,
 }: RackWiresProps) {
-  const { committedPaths, previewPath } = useRackWires({
+  const { committedPaths, previewPath, removeConnection } = useRackWires({
     rackHeight,
     uHeight,
     width,
@@ -27,9 +27,17 @@ export const RackWires = memo(function RackWires({
   });
 
   return (
-    <g pointerEvents="none">
+    <g>
       {committedPaths.map((wire) => (
-        <g key={wire.id}>
+        <g
+          key={wire.id}
+          className="cursor-pointer"
+          pointerEvents="stroke"
+          onDoubleClick={(event) => {
+            event.stopPropagation();
+            removeConnection(wire.id);
+          }}
+        >
           <path
             d={wire.path}
             className="fill-none stroke-ui-wire-glow opacity-30"
@@ -47,7 +55,7 @@ export const RackWires = memo(function RackWires({
         </g>
       ))}
       {previewPath ? (
-        <g>
+        <g pointerEvents="none">
           <path
             d={previewPath}
             className="fill-none stroke-ui-wire-glow opacity-40"

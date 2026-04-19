@@ -1,4 +1,5 @@
 import { useEffect, useMemo } from "react";
+import { useShallow } from "zustand/react/shallow";
 
 import type { DeviceTemplateConfig } from "@repo/config";
 
@@ -24,12 +25,20 @@ export function useRackPlacement({
   templates,
   initialDevices,
 }: UseRackPlacementArgs) {
-  const deviceIds = useRackDocumentStore((state) => state.document.deviceIds);
-  const devicesById = useRackDocumentStore((state) => state.document.devicesById);
-  const seedDocument = useRackDocumentStore((state) => state.seedDocument);
-  const removeDeviceFromDocument = useRackDocumentStore((state) => state.removeDevice);
-  const removeConnectionsForDevice = useRackDocumentStore(
-    (state) => state.removeConnectionsForDevice,
+  const {
+    deviceIds,
+    devicesById,
+    removeConnectionsForDevice,
+    removeDeviceFromDocument,
+    seedDocument,
+  } = useRackDocumentStore(
+    useShallow((state) => ({
+      deviceIds: state.document.deviceIds,
+      devicesById: state.document.devicesById,
+      removeConnectionsForDevice: state.removeConnectionsForDevice,
+      removeDeviceFromDocument: state.removeDevice,
+      seedDocument: state.seedDocument,
+    })),
   );
 
   useEffect(() => {

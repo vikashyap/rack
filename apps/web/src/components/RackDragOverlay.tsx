@@ -1,6 +1,8 @@
 import { memo } from "react";
 import { DeviceTemplate } from "@repo/ui";
 import { type DeviceTemplateConfig } from "@repo/config";
+import { useShallow } from "zustand/react/shallow";
+
 import { useRackInteractionStore } from "../stores/rackInteractionStore";
 import { type RackDevice } from "../lib/rack-placement";
 import { cn } from "../lib/cn";
@@ -14,9 +16,13 @@ export const RackDragOverlay = memo(function RackDragOverlay({
   templates,
   devices,
 }: RackDragOverlayProps) {
-  const activeDrag = useRackInteractionStore((state) => state.interaction.activeDrag);
-  const point = useRackInteractionStore((state) => state.interaction.mousePoint);
-  const preview = useRackInteractionStore((state) => state.interaction.preview);
+  const { activeDrag, point, preview } = useRackInteractionStore(
+    useShallow((state) => ({
+      activeDrag: state.interaction.activeDrag,
+      point: state.interaction.mousePoint,
+      preview: state.interaction.preview,
+    })),
+  );
 
   const item = activeDrag
     ? activeDrag.kind === "template"

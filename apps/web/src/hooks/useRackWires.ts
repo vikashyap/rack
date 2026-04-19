@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useShallow } from "zustand/react/shallow";
 
 import type { RackDevice } from "../lib/rack-placement";
 import {
@@ -27,11 +28,20 @@ export function useRackWires({
   railWidth,
   devices,
 }: UseRackWiresArgs) {
-  const view = useRackInteractionStore((state) => state.interaction.view);
-  const connectionIds = useRackDocumentStore((state) => state.document.connectionIds);
-  const connectionsById = useRackDocumentStore((state) => state.document.connectionsById);
-  const activeConnection = useRackInteractionStore((state) => state.interaction.activeConnection);
-  const wirePoint = useRackInteractionStore((state) => state.interaction.wirePoint);
+  const { activeConnection, view, wirePoint } = useRackInteractionStore(
+    useShallow((state) => ({
+      activeConnection: state.interaction.activeConnection,
+      view: state.interaction.view,
+      wirePoint: state.interaction.wirePoint,
+    })),
+  );
+  const { connectionIds, connectionsById, removeConnection } = useRackDocumentStore(
+    useShallow((state) => ({
+      connectionIds: state.document.connectionIds,
+      connectionsById: state.document.connectionsById,
+      removeConnection: state.removeConnection,
+    })),
+  );
 
   const visibleDevices = devices.filter((device) => device.view === view);
   const deviceById = new Map(visibleDevices.map((device) => [device.id, device] as const));
@@ -102,5 +112,6 @@ export function useRackWires({
   return {
     committedPaths,
     previewPath,
+    removeConnection,
   };
 }

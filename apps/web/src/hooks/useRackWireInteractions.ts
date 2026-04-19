@@ -1,16 +1,25 @@
 import type { MouseEvent, PointerEvent } from "react";
+import { useShallow } from "zustand/react/shallow";
 
 import { getRackPortTarget, getRackSvgPoint } from "../lib/rack-wire";
 import { useRackInteractionStore } from "../stores/rackInteractionStore";
 
 export function useRackWireInteractions() {
-  const activeConnection = useRackInteractionStore(
-    (state) => state.interaction.activeConnection,
+  const {
+    activeConnection,
+    cancelConnection,
+    completeConnection,
+    setWirePoint,
+    startConnection,
+  } = useRackInteractionStore(
+    useShallow((state) => ({
+      activeConnection: state.interaction.activeConnection,
+      cancelConnection: state.cancelConnection,
+      completeConnection: state.completeConnection,
+      setWirePoint: state.setWirePoint,
+      startConnection: state.startConnection,
+    })),
   );
-  const startConnection = useRackInteractionStore((state) => state.startConnection);
-  const completeConnection = useRackInteractionStore((state) => state.completeConnection);
-  const cancelConnection = useRackInteractionStore((state) => state.cancelConnection);
-  const setWirePoint = useRackInteractionStore((state) => state.setWirePoint);
 
   function handleCanvasClickCapture(event: MouseEvent<SVGSVGElement>) {
     const target = getRackPortTarget(event);

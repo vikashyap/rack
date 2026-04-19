@@ -1,4 +1,5 @@
 import { memo } from "react";
+import { useShallow } from "zustand/react/shallow";
 
 import { Panel, RackFrame, ControlGroup } from "@repo/ui";
 
@@ -32,13 +33,18 @@ const rackStyles = {
 } as const;
 
 const RackHeaderControls = memo(function RackHeaderControls() {
-  const view = useRackInteractionStore((state) => state.interaction.view);
-  const zoom = useRackInteractionStore((state) => state.interaction.zoom);
-  const theme = useRackInteractionStore((state) => state.interaction.theme);
-  const setView = useRackInteractionStore((state) => state.setView);
-  const zoomIn = useRackInteractionStore((state) => state.zoomIn);
-  const zoomOut = useRackInteractionStore((state) => state.zoomOut);
-  const toggleTheme = useRackInteractionStore((state) => state.toggleTheme);
+  const { setView, theme, toggleTheme, view, zoom, zoomIn, zoomOut } =
+    useRackInteractionStore(
+      useShallow((state) => ({
+        setView: state.setView,
+        theme: state.interaction.theme,
+        toggleTheme: state.toggleTheme,
+        view: state.interaction.view,
+        zoom: state.interaction.zoom,
+        zoomIn: state.zoomIn,
+        zoomOut: state.zoomOut,
+      })),
+    );
 
   const canZoomIn = zoom < RACK_MAX_ZOOM;
   const canZoomOut = zoom > RACK_MIN_ZOOM;
@@ -75,8 +81,12 @@ const RackViewport = memo(function RackViewport({
   devices: RackDevice[];
   onRemoveDevice: (deviceId: string) => void;
 }) {
-  const view = useRackInteractionStore((state) => state.interaction.view);
-  const zoom = useRackInteractionStore((state) => state.interaction.zoom);
+  const { view, zoom } = useRackInteractionStore(
+    useShallow((state) => ({
+      view: state.interaction.view,
+      zoom: state.interaction.zoom,
+    })),
+  );
 
   const totalHeight = rackLayout.rackHeight * rackLayout.uHeight;
   const {
