@@ -34,9 +34,17 @@ export function PatchPanelDeviceTemplate({
         height={height}
         rx={4}
         className={cn(
-          "fill-[color:var(--ui-device-body)] stroke-[color:var(--ui-device-accent-soft)] stroke-[0.5]",
+          "fill-ui-device-body stroke-ui-device-border stroke-[1]",
           classNames?.body,
         )}
+      />
+      <rect
+        x={0}
+        y={0}
+        width={4}
+        height={height}
+        rx={4}
+        className={cn("fill-ui-device-accent", classNames?.accent)}
       />
       <rect
         x={0}
@@ -44,12 +52,12 @@ export function PatchPanelDeviceTemplate({
         width={width}
         height={compact ? 5 : 7}
         rx={4}
-        className={cn("fill-[color:var(--ui-device-highlight)]", classNames?.highlight)}
+        className={cn("fill-ui-device-highlight", classNames?.highlight)}
       />
 
       <g transform={`translate(${compact ? 7 : 9}, ${compact ? 5 : 7})`}>
         <Braces
-          className="text-[color:var(--ui-device-accent)] opacity-80"
+          className="text-ui-device-accent opacity-80"
           size={compact ? 10 : 12}
           strokeWidth={2.15}
         />
@@ -59,7 +67,7 @@ export function PatchPanelDeviceTemplate({
         x={compact ? 20 : 24}
         y={compact ? Math.min(10, height / 2 + 2) : Math.min(11, height / 2 + 3)}
         className={cn(
-          "fill-[color:var(--ui-device-label)] font-sans antialiased",
+          "fill-ui-device-label font-sans antialiased",
           classNames?.label,
           "opacity-95",
         )}

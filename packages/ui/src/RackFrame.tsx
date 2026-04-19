@@ -86,7 +86,7 @@ function RackFrameHeader({
   return (
     <header
       className={cn(
-        "sticky top-4 z-20 mb-4 flex items-center justify-between gap-4 rounded-2xl border border-[color:var(--ui-surface-border)] bg-[color:var(--ui-rack-header-bg)] px-6 py-4 shadow-[var(--ui-surface-shadow)] backdrop-blur",
+        "sticky top-4 z-20 mb-4 flex items-center justify-between gap-4 rounded-2xl border border-ui-surface-border bg-ui-rack-header-bg px-6 py-4 shadow-ui-surface ring-1 ring-inset ring-white/10 backdrop-blur-xl",
         className,
       )}
       {...props}
@@ -95,14 +95,14 @@ function RackFrameHeader({
         <>
           <div className="flex items-center gap-3">
             <div
-              className={cn("h-2.5 w-2.5 rounded-full", !badgeColor && "bg-cyan-400")}
+              className={cn("h-2.5 w-2.5 rounded-full", !badgeColor && "bg-ui-status-online")}
               style={badgeColor ? { backgroundColor: badgeColor } : undefined}
             />
             <div>
-              <div className="text-[length:var(--ui-surface-title-size)] font-semibold text-white">
+              <div className="text-ui-surface-title-size font-semibold text-ui-text-strong">
                 {title}
               </div>
-              <div className="text-[length:var(--ui-surface-subtitle-size)] text-[color:var(--ui-surface-subtitle-color)]">
+              <div className="text-ui-surface-subtitle-size text-ui-surface-subtitle">
                 {subtitle}
               </div>
             </div>
@@ -183,7 +183,7 @@ function RackFrameViewport({
   return (
     <section
       className={cn(
-        "min-h-0 flex-1 overflow-hidden rounded-2xl border border-[color:var(--ui-rack-viewport-border)] bg-[color:var(--ui-rack-viewport-bg)] shadow-[var(--ui-rack-viewport-shadow)] backdrop-blur",
+        "min-h-0 flex-1 overflow-hidden rounded-2xl border border-ui-rack-viewport-border bg-ui-rack-viewport-bg shadow-ui-rack-viewport ring-1 ring-inset ring-white/10 backdrop-blur-xl",
         className,
       )}
       {...props}
@@ -249,14 +249,14 @@ function RackFrameBackground({
   ...props
 }: RackFrameBackgroundProps) {
   return (
-    <rect
-      x={0}
-      y={0}
-      width={width}
-      height={totalHeight}
-      className={cn("fill-[color:var(--ui-rack-bg)]", className)}
-      {...props}
-    />
+      <rect
+        x={0}
+        y={0}
+        width={width}
+        height={totalHeight}
+        className={cn("fill-ui-rack-bg", className)}
+        {...props}
+      />
   );
 }
 
@@ -274,28 +274,28 @@ function RackFrameRails({
         y={0}
         width={railWidth}
         height={totalHeight}
-        className="fill-[color:var(--ui-rack-rail-base)]"
+        className="fill-ui-rack-rail-base"
       />
       <rect
         x={0}
         y={0}
         width={railWidth}
         height={totalHeight}
-        className="fill-[color:var(--ui-rack-rail-overlay)]"
+        className="fill-ui-rack-rail-overlay"
       />
       <rect
         x={width - railWidth}
         y={0}
         width={railWidth}
         height={totalHeight}
-        className="fill-[color:var(--ui-rack-rail-base)]"
+        className="fill-ui-rack-rail-base"
       />
       <rect
         x={width - railWidth}
         y={0}
         width={railWidth}
         height={totalHeight}
-        className="fill-[color:var(--ui-rack-rail-overlay)]"
+        className="fill-ui-rack-rail-overlay"
       />
     </g>
   );
@@ -323,7 +323,7 @@ function RackFrameMarkers({
               y1={y}
               x2={width - railWidth}
               y2={y}
-              className="stroke-[color:var(--ui-rack-divider)]"
+              className="stroke-ui-rack-divider"
               strokeDasharray="4 4"
             />
             <text
@@ -331,7 +331,7 @@ function RackFrameMarkers({
               y={y + uHeight / 2}
               textAnchor="middle"
               dominantBaseline="middle"
-              className="fill-[color:var(--ui-rack-label)] font-mono text-[11px] tracking-[0.2em]"
+              className="fill-ui-rack-label font-mono text-[11px] tracking-[0.2em]"
             >
               {uNumber}
             </text>
@@ -339,25 +339,25 @@ function RackFrameMarkers({
               cx={railWidth - 10}
               cy={y + uHeight / 3}
               r={mountHoleRadius}
-              className="fill-[color:var(--ui-rack-bg)] stroke-[color:var(--ui-rack-hole)]"
+              className="fill-ui-rack-bg stroke-ui-rack-hole"
             />
             <circle
               cx={railWidth - 10}
               cy={y + (2 * uHeight) / 3}
               r={mountHoleRadius}
-              className="fill-[color:var(--ui-rack-bg)] stroke-[color:var(--ui-rack-hole)]"
+              className="fill-ui-rack-bg stroke-ui-rack-hole"
             />
             <circle
               cx={width - railWidth + 10}
               cy={y + uHeight / 3}
               r={mountHoleRadius}
-              className="fill-[color:var(--ui-rack-bg)] stroke-[color:var(--ui-rack-hole)]"
+              className="fill-ui-rack-bg stroke-ui-rack-hole"
             />
             <circle
               cx={width - railWidth + 10}
               cy={y + (2 * uHeight) / 3}
               r={mountHoleRadius}
-              className="fill-[color:var(--ui-rack-bg)] stroke-[color:var(--ui-rack-hole)]"
+              className="fill-ui-rack-bg stroke-ui-rack-hole"
             />
           </g>
         );
@@ -383,13 +383,13 @@ function RackFrameViewBadge({
         width={44}
         height={18}
         rx={9}
-        className="fill-[color:var(--ui-rack-badge-bg)] stroke-[color:var(--ui-rack-badge-border)]"
+        className="fill-ui-rack-badge-bg stroke-ui-rack-badge-border"
       />
       <text
         x={22}
         y={12.5}
         textAnchor="middle"
-        className="fill-[color:var(--ui-device-label)] font-mono text-[11px] tracking-[0.2em] font-bold"
+        className="fill-ui-device-label font-mono text-[11px] tracking-[0.2em] font-bold"
       >
         {view}
       </text>

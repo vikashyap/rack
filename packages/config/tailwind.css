@@ -4,9 +4,62 @@
 @source "../../apps/web/src";
 @source "./src";
 
-@theme {
+@theme inline {
   --font-sans: "Avenir Next", "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --font-serif: "Iowan Old Style", "Palatino Lineotype", "Book Antiqua", Georgia, serif;
+
+  --color-ui-surface-bg: var(--ui-surface-bg);
+  --color-ui-surface-bg-strong: var(--ui-surface-bg-strong);
+  --color-ui-surface-accent: var(--ui-surface-accent);
+  --color-ui-surface-border: var(--ui-surface-border);
+  --color-ui-surface-border-soft: var(--ui-surface-border-soft);
+  --color-ui-surface-subtitle: var(--ui-surface-subtitle-color);
+  --color-ui-text-strong: var(--ui-text-strong);
+  --color-ui-status-online: var(--ui-status-online);
+  --color-ui-status-valid: var(--ui-status-valid);
+  --color-ui-status-invalid: var(--ui-status-invalid);
+  --color-ui-status-editing: var(--ui-status-editing);
+  --color-ui-control-bg: var(--ui-control-bg);
+  --color-ui-control-border: var(--ui-control-border);
+  --color-ui-control-item-active-bg: var(--ui-control-item-active-bg);
+  --color-ui-control-item-active-fg: var(--ui-control-item-active-fg);
+  --color-ui-control-item-idle-fg: var(--ui-control-item-idle-fg);
+  --color-ui-control-item-hover-bg: var(--ui-control-item-hover-bg);
+  --color-ui-control-value-color: var(--ui-control-value-color);
+  --color-ui-port-shell-bg: var(--ui-port-shell-bg);
+  --color-ui-port-shell-border: var(--ui-port-shell-border);
+  --color-ui-rack-header-bg: var(--ui-rack-header-bg);
+  --color-ui-rack-viewport-bg: var(--ui-rack-viewport-bg);
+  --color-ui-rack-viewport-border: var(--ui-rack-viewport-border);
+  --color-ui-rack-bg: var(--ui-rack-bg);
+  --color-ui-rack-rail-base: var(--ui-rack-rail-base);
+  --color-ui-rack-rail-overlay: var(--ui-rack-rail-overlay);
+  --color-ui-rack-divider: var(--ui-rack-divider);
+  --color-ui-rack-label: var(--ui-rack-label);
+  --color-ui-rack-hole: var(--ui-rack-hole);
+  --color-ui-rack-badge-bg: var(--ui-rack-badge-bg);
+  --color-ui-rack-badge-border: var(--ui-rack-badge-border);
+  --color-ui-device-body: var(--ui-device-body);
+  --color-ui-device-accent: var(--ui-device-accent);
+  --color-ui-device-accent-soft: var(--ui-device-accent-soft);
+  --color-ui-device-border: var(--ui-device-border);
+  --color-ui-device-label: var(--ui-device-label);
+  --color-ui-device-highlight: var(--ui-device-highlight);
+  --radius-ui-surface: var(--ui-surface-radius);
+  --radius-ui-control: var(--ui-control-radius);
+  --radius-ui-control-item: var(--ui-control-item-radius);
+  --shadow-ui-surface: var(--ui-surface-shadow);
+  --shadow-ui-rack-viewport: var(--ui-rack-viewport-shadow);
+  --shadow-ui-port-shell: var(--ui-port-shell-shadow);
+  --spacing-ui-control-pad: var(--ui-control-pad);
+  --spacing-ui-control-item-pad-x: var(--ui-control-item-pad-x);
+  --spacing-ui-control-item-pad-y: var(--ui-control-item-pad-y);
+  --spacing-ui-surface-pad-x: var(--ui-surface-pad-x);
+  --spacing-ui-surface-pad-y: var(--ui-surface-pad-y);
+  --spacing-ui-surface-body-pad-y: var(--ui-surface-body-pad-y);
+  --text-ui-control-item-size: var(--ui-control-item-text-size);
+  --text-ui-surface-title-size: var(--ui-surface-title-size);
+  --text-ui-surface-subtitle-size: var(--ui-surface-subtitle-size);
 }
 
 @layer base {
@@ -14,11 +67,11 @@
     color-scheme: dark;
 
     /* Base Tokens (Dark) */
-    --ui-surface-bg: rgba(15, 23, 42, 0.82);
-    --ui-surface-bg-strong: rgba(2, 6, 23, 0.9);
-    --ui-surface-border: rgba(255, 255, 255, 0.1);
-    --ui-surface-border-soft: rgba(255, 255, 255, 0.06);
-    --ui-surface-shadow: 0 24px 80px rgba(2, 6, 23, 0.35);
+    --ui-surface-bg: rgba(15, 23, 42, 0.42);
+    --ui-surface-bg-strong: rgba(2, 6, 23, 0.66);
+    --ui-surface-border: rgba(255, 255, 255, 0.16);
+    --ui-surface-border-soft: rgba(255, 255, 255, 0.08);
+    --ui-surface-shadow: 0 28px 64px rgba(2, 6, 23, 0.24);
     --ui-surface-radius: 1.25rem;
     --ui-surface-pad-x: 1.5rem;
     --ui-surface-pad-y: 1.25rem;
@@ -27,8 +80,8 @@
     --ui-surface-title-size: 0.875rem;
     --ui-surface-subtitle-size: 0.75rem;
 
-    --ui-control-bg: rgba(255, 255, 255, 0.04);
-    --ui-control-border: rgba(255, 255, 255, 0.12);
+    --ui-control-bg: rgba(255, 255, 255, 0.05);
+    --ui-control-border: rgba(255, 255, 255, 0.14);
     --ui-control-radius: 0.75rem;
     --ui-control-pad: 0.25rem;
     --ui-control-item-radius: 0.625rem;
@@ -36,19 +89,22 @@
     --ui-control-item-pad-y: 0.4rem;
     --ui-control-item-text-size: 0.75rem;
     --ui-control-item-active-bg: rgba(190, 242, 100, 1);
+    --ui-control-item-active-fg: #020617;
     --ui-control-item-hover-bg: rgba(255, 255, 255, 0.08);
     --ui-control-item-idle-fg: rgba(226, 232, 240, 1);
     --ui-control-value-color: #ffffff;
 
-    --ui-rack-header-bg: rgba(9, 15, 35, 0.84);
-    --ui-rack-viewport-bg: rgba(2, 6, 23, 0.74);
-    --ui-rack-bg: rgba(9, 15, 35, 0.95);
+    --ui-rack-header-bg: rgba(9, 15, 35, 0.58);
+    --ui-rack-viewport-bg: rgba(2, 6, 23, 0.52);
+    --ui-rack-viewport-border: rgba(255, 255, 255, 0.12);
+    --ui-rack-viewport-shadow: 0 24px 68px rgba(2, 6, 23, 0.2);
+    --ui-rack-bg: rgba(9, 15, 35, 0.88);
 
-    --ui-port-shell-bg: rgba(2, 6, 23, 0.75);
+    --ui-port-shell-bg: rgba(2, 6, 23, 0.64);
     --ui-port-shell-border: rgba(255, 255, 255, 0.1);
-    --ui-port-shell-shadow: 0 10px 20px rgba(2, 6, 23, 0.18);
+    --ui-port-shell-shadow: 0 10px 18px rgba(2, 6, 23, 0.14);
 
-    --ui-surface-accent: rgba(255, 255, 255, 0.05);
+    --ui-surface-accent: rgba(255, 255, 255, 0.06);
     --ui-status-online: #10b981;
     --ui-status-valid: #10b981;
     --ui-status-invalid: #f43f5e;
@@ -63,76 +119,93 @@
     --ui-rack-badge-bg: rgba(34, 211, 238, 0.1);
     --ui-rack-badge-border: rgba(34, 211, 238, 0.3);
 
-    --ui-device-body: rgba(2, 6, 23, 0.2);
+    --ui-device-border: rgba(15, 23, 42, 0.48);
+    --ui-device-body: rgba(2, 6, 23, 0.22);
     --ui-device-accent: #64748b;
-    --ui-device-accent-soft: rgba(100, 116, 139, 0.2);
+    --ui-device-accent-soft: rgba(100, 116, 139, 0.18);
     --ui-device-label: rgba(248, 250, 252, 0.9);
-    --ui-device-highlight: rgba(255, 255, 255, 0.2);
+    --ui-device-highlight: rgba(255, 255, 255, 0.14);
 
-    [data-category="server"] {
-      --ui-device-body: rgba(30, 58, 138, 0.45);
-      --ui-device-accent: #3b82f6;
-      --ui-device-accent-soft: rgba(59, 130, 246, 0.25);
-      --ui-device-label: #bfdbfe;
-    }
+  }
 
-    [data-category="switch"] {
-      --ui-device-body: rgba(6, 78, 59, 0.45);
-      --ui-device-accent: #10b981;
-      --ui-device-accent-soft: rgba(16, 185, 129, 0.25);
-      --ui-device-label: #a7f3d0;
-    }
+  [data-category="server"] {
+    --ui-device-body: rgba(37, 99, 235, 0.34);
+    --ui-device-accent: #3b82f6;
+    --ui-device-accent-soft: rgba(96, 165, 250, 0.22);
+    --ui-device-label: #dbeafe;
+    --ui-device-highlight: rgba(255, 255, 255, 0.16);
+  }
 
-    [data-category="router"] {
-      --ui-device-body: rgba(49, 46, 129, 0.45);
-      --ui-device-accent: #6366f1;
-      --ui-device-accent-soft: rgba(99, 102, 241, 0.25);
-      --ui-device-label: #c7d2fe;
-    }
+  [data-category="switch"] {
+    --ui-device-body: rgba(6, 95, 70, 0.34);
+    --ui-device-accent: #10b981;
+    --ui-device-accent-soft: rgba(52, 211, 153, 0.22);
+    --ui-device-label: #d1fae5;
+    --ui-device-highlight: rgba(255, 255, 255, 0.16);
+  }
 
-    [data-category="firewall"] {
-      --ui-device-body: rgba(21, 94, 117, 0.45);
-      --ui-device-accent: #06b6d4;
-      --ui-device-accent-soft: rgba(6, 182, 212, 0.25);
-      --ui-device-label: #a5f3fc;
-    }
+  [data-category="router"] {
+    --ui-device-body: rgba(67, 56, 202, 0.34);
+    --ui-device-accent: #6366f1;
+    --ui-device-accent-soft: rgba(129, 140, 248, 0.22);
+    --ui-device-label: #e0e7ff;
+    --ui-device-highlight: rgba(255, 255, 255, 0.16);
+  }
 
-    [data-category="patch-panel"] {
-      --ui-device-body: rgba(120, 53, 15, 0.45);
-      --ui-device-accent: #f59e0b;
-      --ui-device-accent-soft: rgba(245, 158, 11, 0.25);
-      --ui-device-label: #fde68a;
-    }
+  [data-category="firewall"] {
+    --ui-device-body: rgba(8, 145, 178, 0.34);
+    --ui-device-accent: #06b6d4;
+    --ui-device-accent-soft: rgba(34, 211, 238, 0.22);
+    --ui-device-label: #cffafe;
+    --ui-device-highlight: rgba(255, 255, 255, 0.16);
+  }
 
-    [data-category="pdu"] {
-      --ui-device-body: rgba(159, 18, 57, 0.45);
-      --ui-device-accent: #f43f5e;
-      --ui-device-accent-soft: rgba(244, 63, 94, 0.25);
-      --ui-device-label: #fecdd3;
-    }
+  [data-category="patch-panel"] {
+    --ui-device-body: rgba(180, 83, 9, 0.34);
+    --ui-device-accent: #f59e0b;
+    --ui-device-accent-soft: rgba(251, 191, 36, 0.22);
+    --ui-device-label: #fef3c7;
+    --ui-device-highlight: rgba(255, 255, 255, 0.16);
+  }
+
+  [data-category="pdu"] {
+    --ui-device-body: rgba(190, 24, 93, 0.34);
+    --ui-device-accent: #f43f5e;
+    --ui-device-accent-soft: rgba(251, 113, 133, 0.22);
+    --ui-device-label: #ffe4e6;
+    --ui-device-highlight: rgba(255, 255, 255, 0.16);
   }
 
   .theme-light {
     color-scheme: light;
 
-    --ui-surface-bg: rgba(248, 250, 252, 0.82);
-    --ui-surface-bg-strong: rgba(255, 255, 255, 0.95);
-    --ui-surface-border: rgba(15, 23, 42, 0.08);
+    --ui-surface-bg: rgba(255, 255, 255, 0.74);
+    --ui-surface-bg-strong: rgba(248, 250, 252, 0.94);
+    --ui-surface-border: rgba(15, 23, 42, 0.14);
+    --ui-surface-border-soft: rgba(15, 23, 42, 0.08);
+    --ui-surface-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
     --ui-surface-subtitle-color: #64748b;
 
-    --ui-control-item-active-bg: #0f172a;
-    --ui-control-item-hover-bg: rgba(15, 23, 42, 0.05);
+    --ui-control-bg: rgba(248, 250, 252, 0.78);
+    --ui-control-border: rgba(15, 23, 42, 0.12);
+    --ui-control-item-hover-bg: rgba(15, 23, 42, 0.06);
     --ui-control-item-idle-fg: #475569;
+    --ui-control-value-color: #0f172a;
 
-    --ui-rack-header-bg: rgba(255, 255, 255, 0.85);
-    --ui-rack-viewport-bg: #f8fafc;
-    --ui-rack-bg: #f1f5f9;
+    --ui-control-item-active-bg: #0f172a;
+    --ui-control-item-active-fg: #ffffff;
 
-    --ui-port-shell-bg: rgba(255, 255, 255, 0.9);
-    --ui-port-shell-border: rgba(15, 23, 42, 0.1);
+    --ui-rack-header-bg: rgba(255, 255, 255, 0.76);
+    --ui-rack-viewport-bg: rgba(248, 250, 252, 0.84);
+    --ui-rack-viewport-border: rgba(15, 23, 42, 0.12);
+    --ui-rack-viewport-shadow: 0 20px 48px rgba(15, 23, 42, 0.08);
+    --ui-rack-bg: #f8fafc;
+
+    --ui-port-shell-bg: rgba(255, 255, 255, 0.94);
+    --ui-port-shell-border: rgba(15, 23, 42, 0.12);
 
     --ui-rack-rail-base: #cbd5e1;
-    --ui-rack-rail-overlay: rgba(255, 255, 255, 0.6);
+    --ui-rack-rail-overlay: rgba(255, 255, 255, 0.72);
     --ui-rack-divider: rgba(15, 23, 42, 0.08);
     --ui-rack-label: #94a3b8;
     --ui-rack-hole: #94a3b8;
@@ -141,53 +214,60 @@
 
     --ui-device-highlight: rgba(255, 255, 255, 0.5);
     --ui-device-label: #334155;
-
-    [data-category="server"] {
-      --ui-device-body: #eff6ff;
-      --ui-device-accent: #3b82f6;
-      --ui-device-accent-soft: rgba(59, 130, 246, 0.15);
-      --ui-device-label: #1d4ed8;
-    }
-
-    [data-category="switch"] {
-      --ui-device-body: #ecfdf5;
-      --ui-device-accent: #10b981;
-      --ui-device-accent-soft: rgba(16, 185, 129, 0.15);
-      --ui-device-label: #047857;
-    }
-
-    [data-category="router"] {
-      --ui-device-body: #eef2ff;
-      --ui-device-accent: #6366f1;
-      --ui-device-accent-soft: rgba(99, 102, 241, 0.15);
-      --ui-device-label: #4338ca;
-    }
-
-    [data-category="firewall"] {
-      --ui-device-body: #ecfeff;
-      --ui-device-accent: #06b6d4;
-      --ui-device-accent-soft: rgba(6, 182, 212, 0.15);
-      --ui-device-label: #0e7490;
-    }
-
-    [data-category="patch-panel"] {
-      --ui-device-body: #fffbeb;
-      --ui-device-accent: #f59e0b;
-      --ui-device-accent-soft: rgba(245, 158, 11, 0.15);
-      --ui-device-label: #b45309;
-    }
-
-    [data-category="pdu"] {
-      --ui-device-body: #fff1f2;
-      --ui-device-accent: #f43f5e;
-      --ui-device-accent-soft: rgba(244, 63, 94, 0.15);
-      --ui-device-label: #be123c;
-    }
+    --ui-device-border: rgba(15, 23, 42, 0.18);
 
     --ui-status-online: #059669;
     --ui-status-valid: #059669;
     --ui-status-invalid: #e11d48;
     --ui-text-strong: #0f172a;
+  }
+
+  .theme-light [data-category="server"] {
+    --ui-device-body: #eff6ff;
+    --ui-device-accent: #3b82f6;
+    --ui-device-accent-soft: rgba(59, 130, 246, 0.15);
+    --ui-device-label: #1d4ed8;
+    --ui-device-border: rgba(30, 41, 59, 0.14);
+  }
+
+  .theme-light [data-category="switch"] {
+    --ui-device-body: #ecfdf5;
+    --ui-device-accent: #10b981;
+    --ui-device-accent-soft: rgba(16, 185, 129, 0.15);
+    --ui-device-label: #047857;
+    --ui-device-border: rgba(30, 41, 59, 0.14);
+  }
+
+  .theme-light [data-category="router"] {
+    --ui-device-body: #eef2ff;
+    --ui-device-accent: #6366f1;
+    --ui-device-accent-soft: rgba(99, 102, 241, 0.15);
+    --ui-device-label: #4338ca;
+    --ui-device-border: rgba(30, 41, 59, 0.14);
+  }
+
+  .theme-light [data-category="firewall"] {
+    --ui-device-body: #ecfeff;
+    --ui-device-accent: #06b6d4;
+    --ui-device-accent-soft: rgba(6, 182, 212, 0.15);
+    --ui-device-label: #0e7490;
+    --ui-device-border: rgba(30, 41, 59, 0.14);
+  }
+
+  .theme-light [data-category="patch-panel"] {
+    --ui-device-body: #fffbeb;
+    --ui-device-accent: #f59e0b;
+    --ui-device-accent-soft: rgba(245, 158, 11, 0.15);
+    --ui-device-label: #b45309;
+    --ui-device-border: rgba(30, 41, 59, 0.14);
+  }
+
+  .theme-light [data-category="pdu"] {
+    --ui-device-body: #fff1f2;
+    --ui-device-accent: #f43f5e;
+    --ui-device-accent-soft: rgba(244, 63, 94, 0.15);
+    --ui-device-label: #be123c;
+    --ui-device-border: rgba(30, 41, 59, 0.14);
   }
 
   html {

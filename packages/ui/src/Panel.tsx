@@ -15,11 +15,11 @@ const PanelRoot = forwardRef<HTMLElement, PanelBaseProps>(function PanelRoot(
   ref,
 ) {
   return (
-    <section
+      <section
       ref={ref as never}
       className={cn(
-        "flex min-h-0 flex-col overflow-hidden rounded-2xl border border-[color:var(--ui-surface-border)] bg-[color:var(--ui-surface-bg)] shadow-[var(--ui-surface-shadow)] backdrop-blur",
-        tone === "muted" && "bg-[color:var(--ui-surface-bg-strong)]",
+        "flex min-h-0 flex-col overflow-hidden rounded-ui-surface border border-ui-surface-border bg-ui-surface-bg shadow-ui-surface ring-1 ring-inset ring-white/10 backdrop-blur-xl",
+        tone === "muted" && "bg-ui-surface-bg-strong",
         className,
       )}
       {...props}
@@ -33,7 +33,7 @@ function PanelHeader({ className, ...props }: PanelSlotProps) {
   return (
     <div
       className={cn(
-        "flex items-center justify-between gap-3 border-b border-[color:var(--ui-surface-border-soft)] px-5 py-4",
+        "flex items-center justify-between gap-3 border-b border-ui-surface-border-soft px-ui-surface-pad-x py-ui-surface-pad-y",
         className,
       )}
       {...props}
@@ -44,7 +44,10 @@ function PanelHeader({ className, ...props }: PanelSlotProps) {
 function PanelBody({ className, ...props }: PanelSlotProps) {
   return (
     <div
-      className={cn("min-h-0 flex-1 px-5 py-4", className)}
+      className={cn(
+        "min-h-0 flex-1 px-ui-surface-pad-x py-ui-surface-body-pad-y",
+        className,
+      )}
       {...props}
     />
   );
@@ -54,7 +57,7 @@ function PanelFooter({ className, ...props }: PanelSlotProps) {
   return (
     <div
       className={cn(
-        "border-t border-[color:var(--ui-surface-border-soft)] px-5 py-4",
+        "border-t border-ui-surface-border-soft px-ui-surface-pad-x py-ui-surface-pad-y",
         className,
       )}
       {...props}
@@ -66,7 +69,7 @@ function PanelTitle({ className, ...props }: PanelTextProps) {
   return (
     <p
       className={cn(
-        "text-[length:var(--ui-surface-title-size)] font-semibold tracking-tight text-[color:var(--ui-text-strong)]",
+        "text-ui-surface-title-size font-semibold tracking-tight text-ui-text-strong",
         className,
       )}
       {...props}
@@ -78,7 +81,7 @@ function PanelDescription({ className, ...props }: PanelTextProps) {
   return (
     <p
       className={cn(
-        "text-[length:var(--ui-surface-subtitle-size)] text-[color:var(--ui-surface-subtitle-color)]",
+        "text-ui-surface-subtitle-size text-ui-surface-subtitle",
         className,
       )}
       {...props}

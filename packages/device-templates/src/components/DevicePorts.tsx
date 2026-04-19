@@ -56,7 +56,7 @@ export function DevicePorts({
               height={portHeight}
               rx={density === "compact" ? 3.5 : 4}
               className={cn(
-                "fill-[color:var(--ui-port-shell-bg)] stroke-[color:var(--ui-port-shell-border)] shadow-[var(--ui-port-shell-shadow)] transition-[stroke,fill,transform] duration-200 group-hover/port:stroke-[color:var(--ui-device-accent)]",
+                "fill-ui-port-shell-bg stroke-ui-port-shell-border shadow-ui-port-shell transition-[stroke,fill,transform] duration-200 group-hover/port:stroke-ui-device-accent",
                 classNames?.portShell,
               )}
             />
@@ -77,7 +77,7 @@ export function DevicePorts({
               strokeWidth={density === "compact" ? 2.2 : 2.35}
               absoluteStrokeWidth
               className={cn(
-                "pointer-events-none transition-colors duration-200 text-[color:var(--ui-device-label)] group-hover/port:text-[color:var(--ui-device-accent)]",
+                "pointer-events-none transition-colors duration-200 text-ui-device-label group-hover/port:text-ui-device-accent",
               )}
             />
           </g>

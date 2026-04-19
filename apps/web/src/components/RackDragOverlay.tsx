@@ -48,8 +48,8 @@ export const RackDragOverlay = memo(function RackDragOverlay({
         className={cn(
           "absolute left-0 top-0 -translate-x-1/2 -translate-y-1/2 overflow-visible rounded-sm border shadow-2xl backdrop-blur-sm transition-all duration-200 scale-105",
           isValid === false
-            ? "border-[color:var(--ui-status-invalid)]/60 bg-[color:var(--ui-status-invalid)]/10"
-            : "border-[color:var(--ui-status-valid)]/50 bg-[color:var(--ui-status-valid)]/5"
+            ? "border-ui-status-invalid/60 bg-ui-status-invalid/10"
+            : "border-ui-status-valid/50 bg-ui-status-valid/5"
         )}
         style={{
           width: width,
@@ -71,8 +71,8 @@ export const RackDragOverlay = memo(function RackDragOverlay({
           className={cn(
             "absolute inset-0 -z-10 translate-y-2 blur-2xl transition-colors duration-300",
             isValid === false
-              ? "bg-[color:var(--ui-status-invalid)]/20"
-              : "bg-[color:var(--ui-status-valid)]/15",
+              ? "bg-ui-status-invalid/20"
+              : "bg-ui-status-valid/15",
           )}
         />
 
@@ -81,8 +81,8 @@ export const RackDragOverlay = memo(function RackDragOverlay({
             className={cn(
               "rounded-md px-3 py-1 text-[10px] font-black tracking-widest text-white uppercase shadow-lg transition-transform duration-200",
               isValid === false
-                ? "bg-[color:var(--ui-status-invalid)] animate-shake"
-                : "bg-[color:var(--ui-status-valid)]",
+                ? "bg-ui-status-invalid animate-shake"
+                : "bg-ui-status-valid",
             )}
           >
             {isValid === false ? "Blocked" : "Ready"}

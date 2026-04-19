@@ -43,24 +43,24 @@ const UserProfile = memo(function UserProfile({
 }: UserProfileProps) {
   return (
     <div className={cn(
-      "group flex items-center gap-3 rounded-xl border border-[color:var(--ui-surface-border-soft)] bg-[color:var(--ui-surface-accent)] p-2.5 transition-all",
-      "hover:bg-[color:var(--ui-control-item-hover-bg)] hover:shadow-xl hover:shadow-[color:var(--ui-surface-bg-strong)]/20"
+      "group flex items-center gap-3 rounded-xl border border-ui-surface-border-soft bg-ui-surface-accent p-2.5 transition-all",
+      "hover:bg-ui-control-item-hover-bg hover:shadow-xl"
     )}>
       <div
-        className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xs font-bold ring-2 ring-[color:var(--ui-surface-border)]"
+        className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xs font-bold ring-2 ring-ui-surface-border"
         style={{ backgroundColor: avatarColor }}
       >
         <span className="text-white drop-shadow-md">{initials}</span>
         {isOnline && (
-          <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-[color:var(--ui-surface-bg-strong)] bg-[color:var(--ui-status-online)] shadow-sm" />
+          <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-ui-surface-bg-strong bg-ui-status-online shadow-sm" />
         )}
       </div>
       <div className="flex flex-col min-w-0">
-        <span className="truncate text-sm font-medium text-[color:var(--ui-text-strong)] transition-colors">
+        <span className="truncate text-sm font-medium text-ui-text-strong transition-colors">
           {name}
         </span>
         {activeComponent && (
-          <span className="truncate text-[10px] uppercase tracking-wider text-[color:var(--ui-status-editing)] font-semibold transition-colors">
+          <span className="truncate text-[10px] uppercase tracking-wider text-ui-status-editing font-semibold transition-colors">
             {activeComponent}
           </span>
         )}
@@ -80,31 +80,31 @@ export function CollaborationPanel() {
 
   return (
     <Panel tone="muted" className="h-full min-h-0">
-      <Panel.Header className="bg-[color:var(--ui-surface-accent)]/50">
-        <div className="flex items-center gap-2.5 text-[color:var(--ui-text-strong)]">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[color:var(--ui-status-online)]/10 text-[color:var(--ui-status-online)]">
+      <Panel.Header className="bg-ui-surface-accent/50">
+        <div className="flex items-center gap-2.5 text-ui-text-strong">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-ui-status-online/10 text-ui-status-online">
             <WifiIcon className="h-4 w-4" />
           </div>
           <div>
             <h2 className="text-sm font-bold tracking-tight">Live Connection</h2>
             <div className="flex items-center gap-1.5 mt-0.5">
               <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[color:var(--ui-status-online)] opacity-75"></span>
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-[color:var(--ui-status-online)]"></span>
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-ui-status-online opacity-75"></span>
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-ui-status-online"></span>
               </span>
-              <span className="text-[10px] font-medium text-[color:var(--ui-status-online)] opacity-80 uppercase tracking-widest">Active session</span>
+              <span className="text-[10px] font-medium text-ui-status-online opacity-80 uppercase tracking-widest">Active session</span>
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-1 rounded-full bg-[color:var(--ui-control-bg)] px-2.5 py-1 border border-[color:var(--ui-control-border)]">
-          <UsersIcon className="h-3.5 w-3.5 text-[color:var(--ui-surface-subtitle-color)]" />
-          <span className="text-[11px] font-bold text-[color:var(--ui-text-strong)]">{users.length}</span>
+        <div className="flex items-center gap-1 rounded-full bg-ui-control-bg px-2.5 py-1 border border-ui-control-border">
+          <UsersIcon className="h-3.5 w-3.5 text-ui-surface-subtitle" />
+          <span className="text-[11px] font-bold text-ui-text-strong">{users.length}</span>
         </div>
       </Panel.Header>
 
       <Panel.Body className="space-y-4 overflow-y-auto custom-scrollbar">
         <div>
-          <p className="text-[10px] font-bold text-[color:var(--ui-surface-subtitle-color)] uppercase tracking-[0.2em] mb-4">Collaborators online</p>
+          <p className="text-[10px] font-bold text-ui-surface-subtitle uppercase tracking-[0.2em] mb-4">Collaborators online</p>
           <div className="grid gap-2.5">
             {users.map((user) => (
               <UserProfile
@@ -118,27 +118,27 @@ export function CollaborationPanel() {
           </div>
         </div>
 
-        <div className="rounded-xl bg-gradient-to-br from-[color:var(--ui-surface-bg-strong)] to-[color:var(--ui-surface-bg)] p-4 border border-[color:var(--ui-surface-border-soft)] shadow-sm">
-          <div className="flex items-center gap-2 mb-2 text-[color:var(--ui-text-strong)]">
-            <CircleIcon className="h-3 w-3 text-cyan-400 fill-cyan-400/20" />
+        <div className="rounded-xl bg-gradient-to-br from-ui-surface-bg-strong to-ui-surface-bg p-4 border border-ui-surface-border-soft shadow-sm">
+          <div className="flex items-center gap-2 mb-2 text-ui-text-strong">
+            <CircleIcon className="h-3 w-3 text-ui-status-online fill-ui-status-online/20" />
             <span className="text-[11px] font-bold uppercase tracking-wider">WebSocket Status</span>
           </div>
-          <p className="text-xs text-[color:var(--ui-surface-subtitle-color)] leading-relaxed">
+          <p className="text-xs text-ui-surface-subtitle leading-relaxed">
             Real-time synchronization active. Latest rack state verified.
           </p>
           <div className="mt-4 flex gap-2">
-            <div className="h-1 flex-1 rounded-full bg-[color:var(--ui-status-online)]/10 overflow-hidden">
-              <div className="h-full w-3/4 bg-[color:var(--ui-status-online)] rounded-full animate-pulse-slow"></div>
+            <div className="h-1 flex-1 rounded-full bg-ui-status-online/10 overflow-hidden">
+              <div className="h-full w-3/4 bg-ui-status-online rounded-full animate-pulse-slow"></div>
             </div>
           </div>
         </div>
       </Panel.Body>
 
-      <Panel.Footer className="mt-auto bg-[var(--ui-surface-accent)]/50">
+      <Panel.Footer className="mt-auto bg-ui-surface-accent/50">
         <button className={cn(
           "w-full rounded-xl px-4 py-2.5 text-xs font-bold transition-all active:scale-[0.98]",
-          "bg-[var(--ui-control-item-active-bg)] text-[var(--ui-control-item-active-fg)]",
-          "hover:ring-2 hover:ring-[var(--ui-control-item-active-bg)] hover:ring-offset-2 hover:ring-offset-[var(--ui-surface-bg)] shadow-lg shadow-[var(--ui-control-item-active-bg)]/20"
+          "bg-ui-control-item-active-bg text-ui-control-item-active-fg",
+          "hover:ring-2 hover:ring-ui-control-item-active-bg hover:ring-offset-2 hover:ring-offset-ui-surface-bg shadow-lg shadow-ui-control-item-active-bg/20"
         )}>
           Pause Live Sync
         </button>
