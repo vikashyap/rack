@@ -87,10 +87,6 @@ export function useRackPlacement({
     }
   }
 
-  useEffect(() => {
-    console.log("[rack:document] rack devices snapshot", devices);
-  }, [devices]);
-
   return {
     devices,
     removeDevice,

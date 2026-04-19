@@ -1,6 +1,7 @@
 import { memo } from "react";
 import { Panel } from "@repo/ui";
 import { cn } from "../lib/cn";
+import type { RackCollaborationStatus, RackCollaborator } from "../lib/rack-collaboration";
 
 const UsersIcon = ({ className }: { className?: string }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -69,14 +70,27 @@ const UserProfile = memo(function UserProfile({
   );
 });
 
-export function CollaborationPanel() {
-  const users = [
-    { id: "1", name: "Alex Rivera", initials: "AR", color: "#3b82f6", activeComponent: "Power Supply Unit" },
-    { id: "2", name: "Sarah Chen", initials: "SC", color: "#ec4899", activeComponent: "Switch Hub 24p" },
-    { id: "3", name: "Marcus Thorne", initials: "MT", color: "#f59e0b", activeComponent: "Rack Rail System" },
-    { id: "4", name: "Elena Volkov", initials: "EV", color: "#8b5cf6", activeComponent: "Cooling Fan Asset" },
-    { id: "5", name: "Jordan Smith", initials: "JS", color: "#10b981", activeComponent: "Server Node 01" },
-  ];
+function getInitials(name: string) {
+  return name
+    .split(" ")
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+}
+
+interface CollaborationPanelProps {
+  currentUserId: string;
+  status: RackCollaborationStatus;
+  users: RackCollaborator[];
+}
+
+export function CollaborationPanel({
+  currentUserId,
+  status,
+  users,
+}: CollaborationPanelProps) {
+  const isConnected = status === "connected";
 
   return (
     <Panel tone="muted" className="h-full min-h-0">
@@ -92,7 +106,9 @@ export function CollaborationPanel() {
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-ui-status-online opacity-75"></span>
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-ui-status-online"></span>
               </span>
-              <span className="text-[10px] font-medium text-ui-status-online opacity-80 uppercase tracking-widest">Active session</span>
+              <span className="text-[10px] font-medium text-ui-status-online opacity-80 uppercase tracking-widest">
+                {isConnected ? "Active session" : status}
+              </span>
             </div>
           </div>
         </div>
@@ -110,9 +126,9 @@ export function CollaborationPanel() {
               <UserProfile
                 key={user.id}
                 name={user.name}
-                initials={user.initials}
+                initials={getInitials(user.name)}
                 avatarColor={user.color}
-                activeComponent={user.activeComponent}
+                activeComponent={user.id === currentUserId ? "You" : user.pointer ? "Pointer active" : "Online"}
               />
             ))}
           </div>
@@ -124,11 +140,18 @@ export function CollaborationPanel() {
             <span className="text-[11px] font-bold uppercase tracking-wider">WebSocket Status</span>
           </div>
           <p className="text-xs text-ui-surface-subtitle leading-relaxed">
-            Real-time synchronization active. Latest rack state verified.
+            {isConnected
+              ? "Presence websocket active. Remote pointers are visible inside the rack SVG."
+              : "Waiting for websocket connection from the host app."}
           </p>
           <div className="mt-4 flex gap-2">
             <div className="h-1 flex-1 rounded-full bg-ui-status-online/10 overflow-hidden">
-              <div className="h-full w-3/4 bg-ui-status-online rounded-full animate-pulse-slow"></div>
+              <div
+                className={cn(
+                  "h-full rounded-full animate-pulse-slow",
+                  isConnected ? "w-3/4 bg-ui-status-online" : "w-1/4 bg-ui-surface-subtitle",
+                )}
+              ></div>
             </div>
           </div>
         </div>
@@ -140,7 +163,7 @@ export function CollaborationPanel() {
           "bg-ui-control-item-active-bg text-ui-control-item-active-fg",
           "hover:ring-2 hover:ring-ui-control-item-active-bg hover:ring-offset-2 hover:ring-offset-ui-surface-bg shadow-lg shadow-ui-control-item-active-bg/20"
         )}>
-          Pause Live Sync
+          Live Sync
         </button>
       </Panel.Footer>
     </Panel>

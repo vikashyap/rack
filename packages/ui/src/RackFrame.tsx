@@ -1,4 +1,4 @@
-import type { ComponentPropsWithoutRef, PointerEventHandler, ReactNode, SVGProps } from "react";
+import type { ComponentPropsWithoutRef, ReactNode, SVGProps } from "react";
 
 import { cn } from "./lib/cn";
 import { ControlGroup } from "./ControlGroup";
@@ -35,7 +35,6 @@ export interface RackFrameCanvasProps
   uHeight: number;
   width: number;
   view: RackView;
-  onPointerLeaveCapture?: PointerEventHandler<SVGSVGElement>;
   children?: ReactNode;
 }
 

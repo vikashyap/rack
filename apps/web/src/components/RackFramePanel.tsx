@@ -1,10 +1,12 @@
-import { memo } from "react";
+import { memo, type PointerEvent } from "react";
 import { useShallow } from "zustand/react/shallow";
 
 import { Panel, RackFrame, ControlGroup } from "@repo/ui";
 
+import type { RackCollaborationConnection, RackCollaborator } from "../lib/rack-collaboration";
 import type { RackDevice } from "../lib/rack-placement";
 import { RackDropZones } from "./RackDropZones";
+import { RackPresencePointers } from "./RackPresencePointers";
 import { RackWires } from "./RackWires";
 import { RackDevices } from "./RackDevices";
 import {
@@ -12,9 +14,11 @@ import {
   RACK_MIN_ZOOM,
   useRackInteractionStore,
 } from "../stores/rackInteractionStore";
-import { useRackWireInteractions } from "../hooks";
+import { useRackCollaborationPointer, useRackWireInteractions } from "../hooks";
 
 interface RackFramePanelProps {
+  collaborationConnection: RackCollaborationConnection | null;
+  collaborators: RackCollaborator[];
   devices: RackDevice[];
   onRemoveDevice: (deviceId: string) => void;
 }
@@ -75,9 +79,13 @@ const RackHeaderControls = memo(function RackHeaderControls() {
 });
 
 const RackViewport = memo(function RackViewport({
+  collaborationConnection,
+  collaborators,
   devices,
   onRemoveDevice,
 }: {
+  collaborationConnection: RackCollaborationConnection | null;
+  collaborators: RackCollaborator[];
   devices: RackDevice[];
   onRemoveDevice: (deviceId: string) => void;
 }) {
@@ -94,6 +102,20 @@ const RackViewport = memo(function RackViewport({
     handleCanvasPointerMoveCapture,
     handleCanvasPointerLeaveCapture,
   } = useRackWireInteractions();
+  const {
+    handleCollaborationPointerLeave,
+    handleCollaborationPointerMove,
+  } = useRackCollaborationPointer(collaborationConnection);
+
+  function handlePointerMoveCapture(event: PointerEvent<SVGSVGElement>) {
+    handleCanvasPointerMoveCapture(event);
+    handleCollaborationPointerMove(event);
+  }
+
+  function handlePointerLeave() {
+    handleCanvasPointerLeaveCapture();
+    handleCollaborationPointerLeave();
+  }
 
   return (
     <RackFrame.Viewport>
@@ -111,8 +133,8 @@ const RackViewport = memo(function RackViewport({
             width={rackLayout.width}
             view={view}
             onClickCapture={handleCanvasClickCapture}
-            onPointerMoveCapture={handleCanvasPointerMoveCapture}
-            onPointerLeaveCapture={handleCanvasPointerLeaveCapture}
+            onPointerMoveCapture={handlePointerMoveCapture}
+            onPointerLeave={handlePointerLeave}
           >
             <RackFrame.Background width={rackLayout.width} totalHeight={totalHeight} />
             <RackFrame.Rails width={rackLayout.width} totalHeight={totalHeight} railWidth={rackLayout.railWidth} />
@@ -144,6 +166,17 @@ const RackViewport = memo(function RackViewport({
               devices={devices}
               onRemoveDevice={onRemoveDevice}
             />
+            {collaborationConnection && (
+              <RackPresencePointers
+                currentUserId={collaborationConnection.session.id}
+                rackHeight={rackLayout.rackHeight}
+                railWidth={rackLayout.railWidth}
+                uHeight={rackLayout.uHeight}
+                users={collaborators}
+                view={view}
+                width={rackLayout.width}
+              />
+            )}
             <RackFrame.ViewBadge view={view} width={rackLayout.width} railWidth={rackLayout.railWidth} />
           </RackFrame.Canvas>
         </Panel>
@@ -153,6 +186,8 @@ const RackViewport = memo(function RackViewport({
 });
 
 export const RackFramePanel = memo(function RackFramePanel({
+  collaborationConnection,
+  collaborators,
   devices,
   onRemoveDevice,
 }: RackFramePanelProps) {
@@ -160,6 +195,8 @@ export const RackFramePanel = memo(function RackFramePanel({
     <RackFrame className={rackStyles.outer}>
       <RackHeaderControls />
       <RackViewport
+        collaborationConnection={collaborationConnection}
+        collaborators={collaborators}
         devices={devices}
         onRemoveDevice={onRemoveDevice}
       />

@@ -2,6 +2,7 @@ import { create } from "zustand";
 
 import type { RackConnection, RackConnectionEndpoint } from "../lib/rack-wire";
 import type { RackDeviceRecord } from "../lib/rack-placement";
+import { sendRackDocumentOperation } from "../lib/rack-document-operations";
 
 export type RackDocumentState = {
   deviceIds: string[];
@@ -19,6 +20,7 @@ type RackDocumentStore = {
   connectPorts: (
     from: RackConnectionEndpoint,
     to: RackConnectionEndpoint,
+    id?: string,
   ) => boolean;
   removeConnection: (connectionId: string) => void;
   removeConnectionsForDevice: (deviceId: string) => void;
@@ -91,6 +93,10 @@ export const useRackDocumentStore = create<RackDocumentStore>((set) => ({
         },
       },
     }));
+    sendRackDocumentOperation({
+      type: "device.added",
+      device,
+    });
   },
   updateDeviceStartU: (deviceId, startU) => {
     set((state) => {
@@ -113,6 +119,11 @@ export const useRackDocumentStore = create<RackDocumentStore>((set) => ({
         },
       };
     });
+    sendRackDocumentOperation({
+      type: "device.moved",
+      deviceId,
+      startU,
+    });
   },
   removeDevice: (deviceId) => {
     set((state) => {
@@ -126,13 +137,16 @@ export const useRackDocumentStore = create<RackDocumentStore>((set) => ({
         },
       };
     });
+    sendRackDocumentOperation({
+      type: "device.removed",
+      deviceId,
+    });
   },
-  connectPorts: (from, to) => {
+  connectPorts: (from, to, id = crypto.randomUUID()) => {
     if (from.deviceId === to.deviceId && from.portId === to.portId) {
       return false;
     }
 
-    const id = crypto.randomUUID();
     let didCreate = false;
 
     set((state) => {
@@ -162,6 +176,17 @@ export const useRackDocumentStore = create<RackDocumentStore>((set) => ({
       };
     });
 
+    if (didCreate) {
+      sendRackDocumentOperation({
+        type: "connection.added",
+        connection: {
+          id,
+          from,
+          to,
+        },
+      });
+    }
+
     return didCreate;
   },
   removeConnection: (connectionId) => {
@@ -175,6 +200,10 @@ export const useRackDocumentStore = create<RackDocumentStore>((set) => ({
           connectionsById,
         },
       };
+    });
+    sendRackDocumentOperation({
+      type: "connection.removed",
+      connectionId,
     });
   },
   removeConnectionsForDevice: (deviceId) => {

@@ -7,7 +7,12 @@ import { CollaborationPanel } from "../components/CollaborationPanel";
 import { DeviceFrame } from "../components/DeviceFrame";
 import { RackDragOverlay } from "../components/RackDragOverlay";
 import { RackFramePanel } from "../components/RackFramePanel";
-import { useDevicesQuery, useRackDevicesQuery, useRackPlacement } from "../hooks";
+import {
+  useDevicesQuery,
+  useRackCollaborationConnection,
+  useRackDevicesQuery,
+  useRackPlacement,
+} from "../hooks";
 import { useRackInteractionStore } from "../stores/rackInteractionStore";
 
 const EMPTY_DEVICE_TEMPLATES: DeviceTemplateConfig[] = [];
@@ -15,6 +20,7 @@ const EMPTY_DEVICE_TEMPLATES: DeviceTemplateConfig[] = [];
 export function AppFramePage() {
   const devicesQuery = useDevicesQuery();
   const rackDevicesQuery = useRackDevicesQuery();
+  const collaboration = useRackCollaborationConnection();
   const templates = devicesQuery.data ?? EMPTY_DEVICE_TEMPLATES;
 
   const {
@@ -45,10 +51,16 @@ export function AppFramePage() {
         />
 
         <RackFramePanel
+          collaborationConnection={collaboration.connection}
+          collaborators={collaboration.users}
           devices={devices}
           onRemoveDevice={removeDevice}
         />
-        <CollaborationPanel />
+        <CollaborationPanel
+          currentUserId={collaboration.connection.session.id}
+          status={collaboration.status}
+          users={collaboration.users}
+        />
       </div>
 
       <RackDragOverlay

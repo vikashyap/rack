@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { useShallow } from "zustand/react/shallow";
 
 import type { RackDevice } from "../lib/rack-placement";
@@ -104,10 +103,6 @@ export function useRackWires({
       previewPath = sourceAnchor ? buildRackWirePath(sourceAnchor, wirePoint) : null;
     }
   }
-
-  useEffect(() => {
-    console.log("[rack:wires] connections snapshot", connections);
-  }, [connections]);
 
   return {
     committedPaths,
