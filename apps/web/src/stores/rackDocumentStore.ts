@@ -36,7 +36,6 @@ type RackDocumentStore = {
     options?: RackMutationOptions,
   ) => boolean;
   removeConnection: (connectionId: string, options?: RackMutationOptions) => void;
-  removeConnectionsForDevice: (deviceId: string) => void;
 };
 
 const emptyDocument = (): RackDocumentState => ({
@@ -89,6 +88,27 @@ function isSameConnection(
     connection.to.portId === from.portId;
 
   return sameDirection || reverseDirection;
+}
+
+function getConnectionsWithoutDevice(
+  connectionIds: string[],
+  connectionsById: Record<string, RackConnection>,
+  deviceId: string,
+) {
+  const nextConnectionIds = connectionIds.filter((connectionId) => {
+    const connection = connectionsById[connectionId];
+
+    return connection.from.deviceId !== deviceId && connection.to.deviceId !== deviceId;
+  });
+
+  return {
+    connectionIds: nextConnectionIds,
+    connectionsById: Object.fromEntries(
+      nextConnectionIds.map(
+        (connectionId) => [connectionId, connectionsById[connectionId]] as const,
+      ),
+    ),
+  };
 }
 
 export const useRackDocumentStore = create<RackDocumentStore>((set) => ({
@@ -177,6 +197,11 @@ export const useRackDocumentStore = create<RackDocumentStore>((set) => ({
     set((state) => {
       const revisionId = getNextRevisionId(state.document.revisionId, options);
       const { [deviceId]: _removed, ...devicesById } = state.document.devicesById;
+      const nextConnections = getConnectionsWithoutDevice(
+        state.document.connectionIds,
+        state.document.connectionsById,
+        deviceId,
+      );
 
       operation = {
         type: "device.removed",
@@ -191,6 +216,7 @@ export const useRackDocumentStore = create<RackDocumentStore>((set) => ({
           revisionId,
           deviceIds: state.document.deviceIds.filter((id) => id !== deviceId),
           devicesById,
+          ...nextConnections,
         },
       };
     });
@@ -277,28 +303,5 @@ export const useRackDocumentStore = create<RackDocumentStore>((set) => ({
     if (operation) {
       emitRackDocumentOperation(operation);
     }
-  },
-  removeConnectionsForDevice: (deviceId) => {
-    set((state) => {
-      const connectionIds = state.document.connectionIds.filter((connectionId) => {
-        const connection = state.document.connectionsById[connectionId];
-
-        return (
-          connection.from.deviceId !== deviceId && connection.to.deviceId !== deviceId
-        );
-      });
-
-      const connectionsById = Object.fromEntries(
-        connectionIds.map((connectionId) => [connectionId, state.document.connectionsById[connectionId]] as const),
-      );
-
-      return {
-        document: {
-          ...state.document,
-          connectionIds,
-          connectionsById,
-        },
-      };
-    });
   },
 }));

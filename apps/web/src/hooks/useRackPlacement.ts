@@ -27,14 +27,12 @@ export function useRackPlacement({
   const {
     deviceIds,
     devicesById,
-    removeConnectionsForDevice,
     removeDeviceFromDocument,
     seedDocument,
   } = useRackDocumentStore(
     useShallow((state) => ({
       deviceIds: state.document.deviceIds,
       devicesById: state.document.devicesById,
-      removeConnectionsForDevice: state.removeConnectionsForDevice,
       removeDeviceFromDocument: state.removeDevice,
       seedDocument: state.seedDocument,
     })),
@@ -59,7 +57,6 @@ export function useRackPlacement({
 
   function removeDevice(deviceId: string) {
     removeDeviceFromDocument(deviceId);
-    removeConnectionsForDevice(deviceId);
 
     const interaction = useRackInteractionStore.getState();
 

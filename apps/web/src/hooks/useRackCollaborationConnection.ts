@@ -40,9 +40,21 @@ export function useRackCollaborationConnection() {
       }
 
       if (event.type === "operation") {
-        runRemoteRackDocumentOperation(() => {
-          const documentStore = useRackDocumentStore.getState();
+        const documentStore = useRackDocumentStore.getState();
+        const {
+          rackId: currentRackId,
+          revisionId: currentRevisionId,
+        } = documentStore.document;
 
+        if (event.operation.rackId !== currentRackId) {
+          return;
+        }
+
+        if (event.operation.revisionId <= currentRevisionId) {
+          return;
+        }
+
+        runRemoteRackDocumentOperation(() => {
           if (event.operation.type === "device.added") {
             documentStore.addDevice(event.operation.device, {
               revisionId: event.operation.revisionId,
@@ -65,7 +77,6 @@ export function useRackCollaborationConnection() {
             documentStore.removeDevice(event.operation.deviceId, {
               revisionId: event.operation.revisionId,
             });
-            documentStore.removeConnectionsForDevice(event.operation.deviceId);
             return;
           }
 
