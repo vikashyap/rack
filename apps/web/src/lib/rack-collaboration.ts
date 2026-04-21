@@ -38,23 +38,33 @@ export type RackCollaborationConnection = {
 export type RackDocumentOperation =
   | {
       type: "device.added";
+      rackId: string;
+      revisionId: number;
       device: RackDeviceRecord;
     }
   | {
       type: "device.moved";
+      rackId: string;
+      revisionId: number;
       deviceId: string;
       startU: number;
     }
   | {
       type: "device.removed";
+      rackId: string;
+      revisionId: number;
       deviceId: string;
     }
   | {
       type: "connection.added";
+      rackId: string;
+      revisionId: number;
       connection: RackConnection;
     }
   | {
       type: "connection.removed";
+      rackId: string;
+      revisionId: number;
       connectionId: string;
     };
 

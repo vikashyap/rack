@@ -20,6 +20,8 @@ export function fetchDevices() {
 }
 
 export type RackDocumentResponse = {
+  rackId: string;
+  revisionId: number;
   devices: RackDeviceRecord[];
   connections: RackConnection[];
 };

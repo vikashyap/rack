@@ -44,7 +44,9 @@ export function useRackCollaborationConnection() {
           const documentStore = useRackDocumentStore.getState();
 
           if (event.operation.type === "device.added") {
-            documentStore.addDevice(event.operation.device);
+            documentStore.addDevice(event.operation.device, {
+              revisionId: event.operation.revisionId,
+            });
             return;
           }
 
@@ -52,12 +54,17 @@ export function useRackCollaborationConnection() {
             documentStore.updateDeviceStartU(
               event.operation.deviceId,
               event.operation.startU,
+              {
+                revisionId: event.operation.revisionId,
+              },
             );
             return;
           }
 
           if (event.operation.type === "device.removed") {
-            documentStore.removeDevice(event.operation.deviceId);
+            documentStore.removeDevice(event.operation.deviceId, {
+              revisionId: event.operation.revisionId,
+            });
             documentStore.removeConnectionsForDevice(event.operation.deviceId);
             return;
           }
@@ -67,11 +74,16 @@ export function useRackCollaborationConnection() {
               event.operation.connection.from,
               event.operation.connection.to,
               event.operation.connection.id,
+              {
+                revisionId: event.operation.revisionId,
+              },
             );
             return;
           }
 
-          documentStore.removeConnection(event.operation.connectionId);
+          documentStore.removeConnection(event.operation.connectionId, {
+            revisionId: event.operation.revisionId,
+          });
         });
       }
     });

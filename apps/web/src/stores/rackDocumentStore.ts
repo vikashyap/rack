@@ -4,35 +4,56 @@ import type { RackDocumentOperation } from "../lib/rack-collaboration";
 import { sendRackDocumentOperation as emitRackDocumentOperation } from "../lib/rack-document-operations";
 import type { RackConnection, RackConnectionEndpoint } from "../lib/rack-wire";
 import type { RackDeviceRecord } from "../lib/rack-placement";
+import type { RackDocumentResponse } from "../lib/api";
 
 export type RackDocumentState = {
+  rackId: string;
+  revisionId: number;
   deviceIds: string[];
   devicesById: Record<string, RackDeviceRecord>;
   connectionIds: string[];
   connectionsById: Record<string, RackConnection>;
 };
 
+type RackMutationOptions = {
+  revisionId?: number;
+};
+
 type RackDocumentStore = {
   document: RackDocumentState;
-  seedDocument: (devices: RackDeviceRecord[], connections?: RackConnection[]) => void;
-  addDevice: (device: RackDeviceRecord) => void;
-  updateDeviceStartU: (deviceId: string, startU: number) => void;
-  removeDevice: (deviceId: string) => void;
+  seedDocument: (document: RackDocumentResponse) => void;
+  addDevice: (device: RackDeviceRecord, options?: RackMutationOptions) => void;
+  updateDeviceStartU: (
+    deviceId: string,
+    startU: number,
+    options?: RackMutationOptions,
+  ) => void;
+  removeDevice: (deviceId: string, options?: RackMutationOptions) => void;
   connectPorts: (
     from: RackConnectionEndpoint,
     to: RackConnectionEndpoint,
     id?: string,
+    options?: RackMutationOptions,
   ) => boolean;
-  removeConnection: (connectionId: string) => void;
+  removeConnection: (connectionId: string, options?: RackMutationOptions) => void;
   removeConnectionsForDevice: (deviceId: string) => void;
 };
 
 const emptyDocument = (): RackDocumentState => ({
+  rackId: "rack-main",
+  revisionId: 1,
   deviceIds: [],
   devicesById: {},
   connectionIds: [],
   connectionsById: {},
 });
+
+function getNextRevisionId(
+  currentRevisionId: number,
+  options?: RackMutationOptions,
+) {
+  return options?.revisionId ?? currentRevisionId + 1;
+}
 
 function normalizeConnections(connections: RackConnection[]) {
   return {
@@ -72,34 +93,50 @@ function isSameConnection(
 
 export const useRackDocumentStore = create<RackDocumentStore>((set) => ({
   document: emptyDocument(),
-  seedDocument: (devices, connections = []) => {
+  seedDocument: ({ rackId, revisionId, devices, connections = [] }) => {
     set((state) => ({
       document: {
         ...state.document,
+        rackId,
+        revisionId,
         ...normalizeDevices(devices),
         ...normalizeConnections(connections),
       },
     }));
   },
-  addDevice: (device) => {
-    set((state) => ({
-      document: {
-        ...state.document,
-        deviceIds: state.document.deviceIds.includes(device.id)
-          ? state.document.deviceIds
-          : [...state.document.deviceIds, device.id],
-        devicesById: {
-          ...state.document.devicesById,
-          [device.id]: device,
+  addDevice: (device, options) => {
+    let operation: RackDocumentOperation | null = null;
+
+    set((state) => {
+      const revisionId = getNextRevisionId(state.document.revisionId, options);
+      operation = {
+        type: "device.added",
+        rackId: state.document.rackId,
+        revisionId,
+        device,
+      };
+
+      return {
+        document: {
+          ...state.document,
+          revisionId,
+          deviceIds: state.document.deviceIds.includes(device.id)
+            ? state.document.deviceIds
+            : [...state.document.deviceIds, device.id],
+          devicesById: {
+            ...state.document.devicesById,
+            [device.id]: device,
+          },
         },
-      },
-    }));
-    emitRackDocumentOperation({
-      type: "device.added",
-      device,
+      };
     });
+    if (operation) {
+      emitRackDocumentOperation(operation);
+    }
   },
-  updateDeviceStartU: (deviceId, startU) => {
+  updateDeviceStartU: (deviceId, startU, options) => {
+    let operation: RackDocumentOperation | null = null;
+
     set((state) => {
       const device = state.document.devicesById[deviceId];
 
@@ -107,9 +144,19 @@ export const useRackDocumentStore = create<RackDocumentStore>((set) => ({
         return state;
       }
 
+      const revisionId = getNextRevisionId(state.document.revisionId, options);
+      operation = {
+        type: "device.moved",
+        rackId: state.document.rackId,
+        revisionId,
+        deviceId,
+        startU,
+      };
+
       return {
         document: {
           ...state.document,
+          revisionId,
           devicesById: {
             ...state.document.devicesById,
             [deviceId]: {
@@ -120,34 +167,43 @@ export const useRackDocumentStore = create<RackDocumentStore>((set) => ({
         },
       };
     });
-    emitRackDocumentOperation({
-      type: "device.moved",
-      deviceId,
-      startU,
-    });
+    if (operation) {
+      emitRackDocumentOperation(operation);
+    }
   },
-  removeDevice: (deviceId) => {
+  removeDevice: (deviceId, options) => {
+    let operation: RackDocumentOperation | null = null;
+
     set((state) => {
+      const revisionId = getNextRevisionId(state.document.revisionId, options);
       const { [deviceId]: _removed, ...devicesById } = state.document.devicesById;
+
+      operation = {
+        type: "device.removed",
+        rackId: state.document.rackId,
+        revisionId,
+        deviceId,
+      };
 
       return {
         document: {
           ...state.document,
+          revisionId,
           deviceIds: state.document.deviceIds.filter((id) => id !== deviceId),
           devicesById,
         },
       };
     });
-    emitRackDocumentOperation({
-      type: "device.removed",
-      deviceId,
-    });
+    if (operation) {
+      emitRackDocumentOperation(operation);
+    }
   },
-  connectPorts: (from, to, id = crypto.randomUUID()) => {
+  connectPorts: (from, to, id = crypto.randomUUID(), options) => {
     if (from.deviceId === to.deviceId && from.portId === to.portId) {
       return false;
     }
 
+    let operation: RackDocumentOperation | null = null;
     let didCreate = false;
 
     set((state) => {
@@ -160,10 +216,22 @@ export const useRackDocumentStore = create<RackDocumentStore>((set) => ({
       }
 
       didCreate = true;
+      const revisionId = getNextRevisionId(state.document.revisionId, options);
+      operation = {
+        type: "connection.added",
+        rackId: state.document.rackId,
+        revisionId,
+        connection: {
+          id,
+          from,
+          to,
+        },
+      };
 
       return {
         document: {
           ...state.document,
+          revisionId,
           connectionIds: [...state.document.connectionIds, id],
           connectionsById: {
             ...state.document.connectionsById,
@@ -177,35 +245,38 @@ export const useRackDocumentStore = create<RackDocumentStore>((set) => ({
       };
     });
 
-    if (didCreate) {
-      emitRackDocumentOperation({
-        type: "connection.added",
-        connection: {
-          id,
-          from,
-          to,
-        },
-      });
+    if (operation && didCreate) {
+      emitRackDocumentOperation(operation);
     }
 
     return didCreate;
   },
-  removeConnection: (connectionId) => {
+  removeConnection: (connectionId, options) => {
+    let operation: RackDocumentOperation | null = null;
+
     set((state) => {
+      const revisionId = getNextRevisionId(state.document.revisionId, options);
       const { [connectionId]: _removed, ...connectionsById } = state.document.connectionsById;
+
+      operation = {
+        type: "connection.removed",
+        rackId: state.document.rackId,
+        revisionId,
+        connectionId,
+      };
 
       return {
         document: {
           ...state.document,
+          revisionId,
           connectionIds: state.document.connectionIds.filter((id) => id !== connectionId),
           connectionsById,
         },
       };
     });
-    emitRackDocumentOperation({
-      type: "connection.removed",
-      connectionId,
-    });
+    if (operation) {
+      emitRackDocumentOperation(operation);
+    }
   },
   removeConnectionsForDevice: (deviceId) => {
     set((state) => {

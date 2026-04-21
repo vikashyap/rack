@@ -45,7 +45,7 @@ export function useRackPlacement({
       return;
     }
 
-    seedDocument(initialDocument.devices, initialDocument.connections);
+    seedDocument(initialDocument);
   }, [deviceIds.length, initialDocument, seedDocument]);
 
   const devices = useMemo(

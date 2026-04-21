@@ -91,6 +91,8 @@ export const devices = [
 ];
 
 export const rackDocument = {
+  rackId: "rack-main",
+  revisionId: 1,
   devices: [
     {
       id: "rack-device-core-switch",
