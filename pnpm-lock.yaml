@@ -107,6 +107,28 @@ importers:
         specifier: 5.9.2
         version: 5.9.2
 
+  packages/rack-templates:
+    dependencies:
+      '@repo/config':
+        specifier: workspace:*
+        version: link:../config
+      react:
+        specifier: ^19.0.0
+        version: 19.1.1
+      react-dom:
+        specifier: ^19.0.0
+        version: 19.1.1(react@19.1.1)
+    devDependencies:
+      '@types/react':
+        specifier: 19.1.12
+        version: 19.1.12
+      '@types/react-dom':
+        specifier: 19.1.9
+        version: 19.1.9(@types/react@19.1.12)
+      typescript:
+        specifier: 5.9.2
+        version: 5.9.2
+
   packages/ui:
     dependencies:
       '@repo/config':

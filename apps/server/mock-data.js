@@ -161,30 +161,6 @@ export const rackDocument = {
   revisionId: 1,
   devices: [
     {
-      id: "rack-device-core-switch",
-      templateKey: "switch-default",
-      startU: 30,
-      view: "front",
-    },
-    {
-      id: "rack-device-app-server-01",
-      templateKey: "server-default",
-      startU: 4,
-      view: "front",
-    },
-    {
-      id: "rack-device-app-server-02",
-      templateKey: "server-default",
-      startU: 5,
-      view: "front",
-    },
-    {
-      id: "rack-device-firewall",
-      templateKey: "firewall-default",
-      startU: 7,
-      view: "front",
-    },
-    {
       id: "rack-device-patch-panel-a",
       templateKey: "patch-panel-default",
       startU: 10,

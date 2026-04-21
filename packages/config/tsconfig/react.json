@@ -1,7 +1,7 @@
 {
   "extends": "./base.json",
   "compilerOptions": {
-    "types": ["node"]
+    "types": ["react", "react-dom"]
   }
 }
 
