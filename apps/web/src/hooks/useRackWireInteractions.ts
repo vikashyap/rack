@@ -1,4 +1,4 @@
-import type { MouseEvent, PointerEvent } from "react";
+import type { PointerEvent } from "react";
 import { useShallow } from "zustand/react/shallow";
 
 import { getRackPortTarget, getRackSvgPoint } from "../lib/rack-wire";
@@ -21,10 +21,12 @@ export function useRackWireInteractions() {
     })),
   );
 
-  function handleCanvasClickCapture(event: MouseEvent<SVGSVGElement>) {
+  function handleCanvasPointerDownCapture(event: PointerEvent<SVGSVGElement>) {
     const target = getRackPortTarget(event);
 
     if (target) {
+      event.stopPropagation();
+
       if (!activeConnection) {
         startConnection(target);
       } else {
@@ -52,7 +54,7 @@ export function useRackWireInteractions() {
   }
 
   return {
-    handleCanvasClickCapture,
+    handleCanvasPointerDownCapture,
     handleCanvasPointerMoveCapture,
     handleCanvasPointerLeaveCapture,
   };

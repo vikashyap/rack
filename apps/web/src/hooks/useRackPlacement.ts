@@ -3,18 +3,17 @@ import { useShallow } from "zustand/react/shallow";
 
 import type { DeviceTemplateConfig } from "@repo/config";
 
+import type { RackDocumentResponse } from "../lib/api";
 import {
-  createRackDeviceRecord,
   resolveRackDevices,
   type RackDevice,
-  type RackDeviceRecord,
 } from "../lib/rack-placement";
 import { useRackDocumentStore } from "../stores/rackDocumentStore";
 import { useRackInteractionStore } from "../stores/rackInteractionStore";
 
 type UseRackPlacementArgs = {
+  initialDocument: RackDocumentResponse | null;
   templates: DeviceTemplateConfig[];
-  initialDevices: RackDevice[];
 };
 
 function isDefined<T>(value: T | null | undefined): value is T {
@@ -22,8 +21,8 @@ function isDefined<T>(value: T | null | undefined): value is T {
 }
 
 export function useRackPlacement({
+  initialDocument,
   templates,
-  initialDevices,
 }: UseRackPlacementArgs) {
   const {
     deviceIds,
@@ -42,23 +41,12 @@ export function useRackPlacement({
   );
 
   useEffect(() => {
-    if (deviceIds.length > 0 || initialDevices.length === 0) {
+    if (!initialDocument || deviceIds.length > 0) {
       return;
     }
 
-    const records = initialDevices.map<RackDeviceRecord>((device) =>
-      createRackDeviceRecord(
-        {
-          templateKey: device.templateKey,
-          startU: device.startU,
-          view: device.view,
-        },
-        device.id,
-      ),
-    );
-
-    seedDocument(records);
-  }, [deviceIds.length, initialDevices, seedDocument]);
+    seedDocument(initialDocument.devices, initialDocument.connections);
+  }, [deviceIds.length, initialDocument, seedDocument]);
 
   const devices = useMemo(
     () =>

@@ -10,7 +10,7 @@ import { RackFramePanel } from "../components/RackFramePanel";
 import {
   useDevicesQuery,
   useRackCollaborationConnection,
-  useRackDevicesQuery,
+  useRackDocumentQuery,
   useRackPlacement,
 } from "../hooks";
 import { useRackInteractionStore } from "../stores/rackInteractionStore";
@@ -19,7 +19,7 @@ const EMPTY_DEVICE_TEMPLATES: DeviceTemplateConfig[] = [];
 
 export function AppFramePage() {
   const devicesQuery = useDevicesQuery();
-  const rackDevicesQuery = useRackDevicesQuery();
+  const rackDocumentQuery = useRackDocumentQuery();
   const collaboration = useRackCollaborationConnection();
   const templates = devicesQuery.data ?? EMPTY_DEVICE_TEMPLATES;
 
@@ -27,8 +27,8 @@ export function AppFramePage() {
     devices,
     removeDevice,
   } = useRackPlacement({
+    initialDocument: rackDocumentQuery.data ?? null,
     templates,
-    initialDevices: rackDevicesQuery.data ?? [],
   });
 
   const theme = useRackInteractionStore((state) => state.interaction.theme);

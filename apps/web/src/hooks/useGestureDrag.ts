@@ -20,6 +20,12 @@ export function useGestureDrag<TPayload>(
 
   return useDrag(
     ({ first, last, active, xy: [x, y], event }) => {
+      const target = event.target as Element | null;
+
+      if (target?.closest?.("[data-port-id]")) {
+        return;
+      }
+
       const point = { x, y };
 
       if (first && !startedRef.current) {

@@ -1,6 +1,7 @@
 import type { DeviceTemplateConfig } from "@repo/config";
 
-import type { RackDevice } from "./rack-placement";
+import type { RackDeviceRecord } from "./rack-placement";
+import type { RackConnection } from "./rack-wire";
 
 const apiBase = "/api";
 
@@ -18,6 +19,11 @@ export function fetchDevices() {
   return fetchJson<DeviceTemplateConfig[]>("/devices");
 }
 
-export function fetchRackDevices() {
-  return fetchJson<RackDevice[]>("/rack-devices");
+export type RackDocumentResponse = {
+  devices: RackDeviceRecord[];
+  connections: RackConnection[];
+};
+
+export function fetchRackDocument() {
+  return fetchJson<RackDocumentResponse>("/rack-document");
 }

@@ -1,8 +1,9 @@
 import { create } from "zustand";
 
+import type { RackDocumentOperation } from "../lib/rack-collaboration";
+import { sendRackDocumentOperation as emitRackDocumentOperation } from "../lib/rack-document-operations";
 import type { RackConnection, RackConnectionEndpoint } from "../lib/rack-wire";
 import type { RackDeviceRecord } from "../lib/rack-placement";
-import { sendRackDocumentOperation } from "../lib/rack-document-operations";
 
 export type RackDocumentState = {
   deviceIds: string[];
@@ -93,7 +94,7 @@ export const useRackDocumentStore = create<RackDocumentStore>((set) => ({
         },
       },
     }));
-    sendRackDocumentOperation({
+    emitRackDocumentOperation({
       type: "device.added",
       device,
     });
@@ -119,7 +120,7 @@ export const useRackDocumentStore = create<RackDocumentStore>((set) => ({
         },
       };
     });
-    sendRackDocumentOperation({
+    emitRackDocumentOperation({
       type: "device.moved",
       deviceId,
       startU,
@@ -137,7 +138,7 @@ export const useRackDocumentStore = create<RackDocumentStore>((set) => ({
         },
       };
     });
-    sendRackDocumentOperation({
+    emitRackDocumentOperation({
       type: "device.removed",
       deviceId,
     });
@@ -177,7 +178,7 @@ export const useRackDocumentStore = create<RackDocumentStore>((set) => ({
     });
 
     if (didCreate) {
-      sendRackDocumentOperation({
+      emitRackDocumentOperation({
         type: "connection.added",
         connection: {
           id,
@@ -201,7 +202,7 @@ export const useRackDocumentStore = create<RackDocumentStore>((set) => ({
         },
       };
     });
-    sendRackDocumentOperation({
+    emitRackDocumentOperation({
       type: "connection.removed",
       connectionId,
     });

@@ -1,4 +1,4 @@
-import type { MouseEvent, PointerEvent } from "react";
+import type { PointerEvent } from "react";
 
 import {
   resolveDevicePortAnchor,
@@ -40,7 +40,7 @@ export function getRackSvgPoint(
 }
 
 export function getRackPortTarget(
-  event: MouseEvent<SVGSVGElement>,
+  event: PointerEvent<SVGSVGElement>,
 ): RackConnectionEndpoint | null {
   const target = event.target as Element | null;
   const portElement = target?.closest?.("[data-port-id]");

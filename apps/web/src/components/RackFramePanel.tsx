@@ -98,7 +98,7 @@ const RackViewport = memo(function RackViewport({
 
   const totalHeight = rackLayout.rackHeight * rackLayout.uHeight;
   const {
-    handleCanvasClickCapture,
+    handleCanvasPointerDownCapture,
     handleCanvasPointerMoveCapture,
     handleCanvasPointerLeaveCapture,
   } = useRackWireInteractions();
@@ -132,7 +132,7 @@ const RackViewport = memo(function RackViewport({
             uHeight={rackLayout.uHeight}
             width={rackLayout.width}
             view={view}
-            onClickCapture={handleCanvasClickCapture}
+            onPointerDownCapture={handleCanvasPointerDownCapture}
             onPointerMoveCapture={handlePointerMoveCapture}
             onPointerLeave={handlePointerLeave}
           >
