@@ -161,14 +161,7 @@ export const useRackInteractionStore = create<RackInteractionStore>((set, get) =
       }
     }
 
-    set((state) => ({
-      interaction: {
-        ...state.interaction,
-        activeDrag: null,
-        mousePoint: null,
-        preview: null,
-      },
-    }));
+    get().clearDrag();
   },
   setWirePoint: (point) => {
     set((state) => ({
@@ -201,25 +194,12 @@ export const useRackInteractionStore = create<RackInteractionStore>((set, get) =
     const source = get().interaction.activeConnection;
 
     if (!source) {
-      set((state) => ({
-        interaction: {
-          ...state.interaction,
-          activeConnection: null,
-          wirePoint: null,
-        },
-      }));
+      get().cancelConnection();
       return;
     }
 
     useRackDocumentStore.getState().connectPorts(source, endpoint);
-
-    set((state) => ({
-      interaction: {
-        ...state.interaction,
-        activeConnection: null,
-        wirePoint: null,
-      },
-    }));
+    get().cancelConnection();
   },
   cancelConnection: () => {
     set((state) => ({

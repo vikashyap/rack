@@ -262,6 +262,54 @@ function BoardToolbar({
   );
 }
 
+function SidebarItem({
+  title,
+  subtitle,
+  badgeText,
+  isDraggable,
+  onPointerDown,
+}: {
+  title: string;
+  subtitle: string;
+  badgeText: string;
+  isDraggable?: boolean;
+  onPointerDown?: (event: ReactPointerEvent<HTMLButtonElement>) => void;
+}) {
+  const content = (
+    <>
+      <div className="min-w-0">
+        <div className="truncate text-sm font-semibold text-ui-text-strong">
+          {title}
+        </div>
+        <div className="mt-1 text-[11px] font-medium uppercase tracking-[0.16em] text-ui-surface-subtitle">
+          {subtitle}
+        </div>
+      </div>
+      <div className="whitespace-nowrap rounded-full border border-ui-surface-border-soft bg-ui-surface-bg px-2.5 py-1 text-[11px] font-semibold text-ui-text-strong">
+        {badgeText}
+      </div>
+    </>
+  );
+
+  if (isDraggable) {
+    return (
+      <button
+        type="button"
+        onPointerDown={onPointerDown}
+        className="flex w-full items-center justify-between gap-3 rounded-xl border border-ui-surface-border-soft bg-ui-surface-accent px-3 py-2.5 text-left transition hover:bg-ui-control-item-hover-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ui-status-online focus-visible:ring-offset-2 focus-visible:ring-offset-ui-surface-bg"
+      >
+        {content}
+      </button>
+    );
+  }
+
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-xl border border-ui-surface-border-soft bg-ui-surface-accent px-3 py-2.5">
+      {content}
+    </div>
+  );
+}
+
 function BoardSidebarPanel({
   activePanel,
   devices,
@@ -309,42 +357,22 @@ function BoardSidebarPanel({
         <div className="max-h-[22rem] space-y-2 overflow-y-auto custom-scrollbar">
           {isRacks
             ? racks.map((rack) => (
-              <button
+              <SidebarItem
                 key={rack.id}
-                type="button"
+                title={rack.name}
+                subtitle={rack.templateKey}
+                badgeText={`${rack.heightU}U rack`}
+                isDraggable
                 onPointerDown={(event) => onRackDragStart(rack, event)}
-                className="flex w-full items-center justify-between gap-3 rounded-xl border border-ui-surface-border-soft bg-ui-surface-accent px-3 py-2.5 text-left transition hover:bg-ui-control-item-hover-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ui-status-online focus-visible:ring-offset-2 focus-visible:ring-offset-ui-surface-bg"
-              >
-                <div className="min-w-0">
-                  <div className="truncate text-sm font-semibold text-ui-text-strong">
-                    {rack.name}
-                  </div>
-                  <div className="mt-1 text-[11px] font-medium uppercase tracking-[0.16em] text-ui-surface-subtitle">
-                    {rack.templateKey}
-                  </div>
-                </div>
-                <div className="rounded-full border border-ui-surface-border-soft bg-ui-surface-bg px-2.5 py-1 text-[11px] font-semibold text-ui-text-strong">
-                  {rack.heightU}U rack
-                </div>
-              </button>
+              />
             ))
             : devices.map((device) => (
-              <div
+              <SidebarItem
                 key={device.id}
-                className="flex items-center justify-between gap-3 rounded-xl border border-ui-surface-border-soft bg-ui-surface-accent px-3 py-2.5"
-              >
-                <div className="min-w-0">
-                  <div className="truncate text-sm font-semibold text-ui-text-strong">
-                    {device.name}
-                  </div>
-                  <div className="mt-1 text-[11px] font-medium uppercase tracking-[0.12em] text-ui-surface-subtitle">
-                    {device.category}
-                  </div>
-                </div>
-                <div className="rounded-full border border-ui-surface-border-soft bg-ui-surface-bg px-2.5 py-1 text-[11px] font-semibold text-ui-text-strong">
-                  {device.uHeight}U
-                </div>
-              </div>
+                title={device.name}
+                subtitle={device.category}
+                badgeText={`${device.uHeight}U`}
+              />
             ))}
         </div>
       </FloatingPanel>
