@@ -2,6 +2,7 @@ export { useRackDrag } from "./useRackDrag";
 export { useRackCollaborationConnection } from "./useRackCollaborationConnection";
 export { useRackCollaborationPointer } from "./useRackCollaborationPointer";
 export { useDevicesQuery } from "./useDevicesQuery";
+export { useProjectsQuery } from "./useProjectsQuery";
 export { useRackDocumentQuery } from "./useRackDocumentQuery";
 export { useRackPlacement } from "./useRackPlacement";
 export { useRackWireInteractions } from "./useRackWireInteractions";

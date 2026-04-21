@@ -3,9 +3,9 @@ import { DeviceTemplate } from "@repo/ui";
 import { type DeviceTemplateConfig } from "@repo/config";
 import { useShallow } from "zustand/react/shallow";
 
-import { useRackInteractionStore } from "../stores/rackInteractionStore";
-import { type RackDevice } from "../lib/rack-placement";
-import { cn } from "../lib/cn";
+import { useRackInteractionStore } from "@stores/rackInteractionStore";
+import { type RackDevice } from "@lib/rack-placement";
+import { cn } from "@lib/cn";
 
 interface RackDragOverlayProps {
   templates: DeviceTemplateConfig[];

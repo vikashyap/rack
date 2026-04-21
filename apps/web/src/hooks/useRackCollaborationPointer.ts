@@ -1,9 +1,9 @@
 import { useRef, type PointerEvent } from "react";
 import { useShallow } from "zustand/react/shallow";
 
-import { getRackSvgPoint } from "../lib/rack-wire";
-import type { RackCollaborationConnection } from "../lib/rack-collaboration";
-import { useRackInteractionStore } from "../stores/rackInteractionStore";
+import { getRackSvgPoint } from "@lib/rack-wire";
+import type { RackCollaborationConnection } from "@lib/rack-collaboration";
+import { useRackInteractionStore } from "@stores/rackInteractionStore";
 
 const pointerSendIntervalMs = 40;
 

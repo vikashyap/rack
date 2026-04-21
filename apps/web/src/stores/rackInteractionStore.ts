@@ -3,14 +3,14 @@ import { create } from "zustand";
 import type { DeviceTemplateConfig } from "@repo/config";
 import type { RackView } from "@repo/ui";
 
-import type { RackConnectionEndpoint } from "../lib/rack-wire";
+import type { RackConnectionEndpoint } from "@lib/rack-wire";
 import {
   canPlaceRackDevice,
   createRackDeviceRecord,
   getRackStartUFromPoint,
   type RackDevice,
   type RackDevicePreview,
-} from "../lib/rack-placement";
+} from "@lib/rack-placement";
 import { useRackDocumentStore } from "./rackDocumentStore";
 
 export type DragPoint = {
@@ -40,8 +40,6 @@ export type RackInteractionState = {
   preview: RackDevicePreview | null;
   activeConnection: RackConnectionEndpoint | null;
   view: RackView;
-  zoom: number;
-  theme: "dark" | "light";
 };
 
 type RackInteractionStore = {
@@ -55,18 +53,8 @@ type RackInteractionStore = {
   completeConnection: (endpoint: RackConnectionEndpoint) => void;
   cancelConnection: () => void;
   setView: (view: RackView) => void;
-  zoomIn: () => void;
-  zoomOut: () => void;
-  toggleTheme: () => void;
 };
-
-const minZoom = 0.75;
-const maxZoom = 1.5;
-const zoomStep = 0.125;
 const rackHeight = 42;
-
-export const RACK_MIN_ZOOM = minZoom;
-export const RACK_MAX_ZOOM = maxZoom;
 
 function resolveDragSource(
   item: RackDragItem | null,
@@ -119,8 +107,6 @@ export const useRackInteractionStore = create<RackInteractionStore>((set, get) =
     preview: null,
     activeConnection: null,
     view: "front",
-    zoom: 1,
-    theme: "dark",
   },
   startDrag: (item, point) => {
     set((state) => ({
@@ -249,30 +235,6 @@ export const useRackInteractionStore = create<RackInteractionStore>((set, get) =
       interaction: {
         ...state.interaction,
         view,
-      },
-    }));
-  },
-  zoomIn: () => {
-    set((state) => ({
-      interaction: {
-        ...state.interaction,
-        zoom: Math.min(maxZoom, state.interaction.zoom + zoomStep),
-      },
-    }));
-  },
-  zoomOut: () => {
-    set((state) => ({
-      interaction: {
-        ...state.interaction,
-        zoom: Math.max(minZoom, state.interaction.zoom - zoomStep),
-      },
-    }));
-  },
-  toggleTheme: () => {
-    set((state) => ({
-      interaction: {
-        ...state.interaction,
-        theme: state.interaction.theme === "dark" ? "light" : "dark",
       },
     }));
   },

@@ -1,7 +1,7 @@
 import { memo } from "react";
 
-import { useRackWires } from "../hooks";
-import type { RackDevice } from "../lib/rack-placement";
+import { useRackWires } from "@hooks";
+import type { RackDevice } from "@lib/rack-placement";
 
 interface RackWiresProps {
   rackHeight: number;

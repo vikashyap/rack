@@ -1,11 +1,11 @@
 import type { DeviceTemplateConfig } from "@repo/config";
 import { useShallow } from "zustand/react/shallow";
 
-import type { RackDevice } from "../lib/rack-placement";
+import type { RackDevice } from "@lib/rack-placement";
 import {
   type RackDragItem,
   useRackInteractionStore,
-} from "../stores/rackInteractionStore";
+} from "@stores/rackInteractionStore";
 import { useGestureDrag } from "./useGestureDrag";
 
 type RackDragSources = {

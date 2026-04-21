@@ -1,12 +1,12 @@
 import { useShallow } from "zustand/react/shallow";
 
-import type { RackDevice } from "../lib/rack-placement";
+import type { RackDevice } from "@lib/rack-placement";
 import {
   buildRackWirePath,
   getRackDevicePortAnchor,
-} from "../lib/rack-wire";
-import { useRackDocumentStore } from "../stores/rackDocumentStore";
-import { useRackInteractionStore } from "../stores/rackInteractionStore";
+} from "@lib/rack-wire";
+import { useRackDocumentStore } from "@stores/rackDocumentStore";
+import { useRackInteractionStore } from "@stores/rackInteractionStore";
 
 type UseRackWiresArgs = {
   rackHeight: number;

@@ -1,6 +1,6 @@
 import http from "node:http";
 import crypto from "node:crypto";
-import { devices, rackDocument } from "./mock-data.js";
+import { devices, projects, rackDocument } from "./mock-data.js";
 
 const clients = new Map();
 
@@ -124,6 +124,12 @@ const server = http.createServer((request, response) => {
   if (url === "/api/devices") {
     response.writeHead(200, { "Content-Type": "application/json" });
     response.end(JSON.stringify(devices));
+    return;
+  }
+
+  if (url === "/api/projects") {
+    response.writeHead(200, { "Content-Type": "application/json" });
+    response.end(JSON.stringify(projects));
     return;
   }
 

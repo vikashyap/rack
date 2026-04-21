@@ -2,7 +2,7 @@ import { memo } from "react";
 
 import type { RackView } from "@repo/ui";
 
-import type { RackCollaborator } from "../lib/rack-collaboration";
+import type { RackCollaborator } from "@lib/rack-collaboration";
 
 interface RackPresencePointersProps {
   currentUserId: string;

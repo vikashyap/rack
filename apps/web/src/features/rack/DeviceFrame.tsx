@@ -3,8 +3,8 @@ import { memo } from "react";
 import type { DeviceTemplateConfig } from "@repo/config";
 import { DeviceTemplate, Panel } from "@repo/ui";
 
-import { useRackDrag } from "../hooks";
-import type { RackDevice } from "../lib/rack-placement";
+import { useRackDrag } from "@hooks";
+import type { RackDevice } from "@lib/rack-placement";
 
 interface DeviceFrameProps {
   templates: DeviceTemplateConfig[];

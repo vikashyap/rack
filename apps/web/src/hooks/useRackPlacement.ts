@@ -3,13 +3,13 @@ import { useShallow } from "zustand/react/shallow";
 
 import type { DeviceTemplateConfig } from "@repo/config";
 
-import type { RackDocumentResponse } from "../lib/api";
+import type { RackDocumentResponse } from "@lib/api";
 import {
   resolveRackDevices,
   type RackDevice,
-} from "../lib/rack-placement";
-import { useRackDocumentStore } from "../stores/rackDocumentStore";
-import { useRackInteractionStore } from "../stores/rackInteractionStore";
+} from "@lib/rack-placement";
+import { useRackDocumentStore } from "@stores/rackDocumentStore";
+import { useRackInteractionStore } from "@stores/rackInteractionStore";
 
 type UseRackPlacementArgs = {
   initialDocument: RackDocumentResponse | null;

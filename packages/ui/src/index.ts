@@ -12,9 +12,14 @@ export type {
   RackFrameZoomActionsProps,
 } from "./RackFrame";
 export { AppShell } from "./AppShell";
+export { ContentCard } from "./ContentCard";
+export { FloatingPanel } from "./FloatingPanel";
 export { RackFrame } from "./RackFrame";
 export { ControlGroup } from "./ControlGroup";
+export { PageHeader } from "./PageHeader";
 export { Panel } from "./Panel";
+export { RackTemplate } from "./RackTemplate";
+export { ThemeToggle } from "./ThemeToggle";
 export type {
   DeviceCategory,
   DevicePortConfig,
@@ -29,3 +34,9 @@ export type {
 export {
   DeviceTemplate,
 } from "./DeviceTemplate";
+export type {
+  RackTemplateComponent,
+  RackTemplateConfig,
+  RackTemplateKey,
+  RackTemplateProps,
+} from "./RackTemplate";

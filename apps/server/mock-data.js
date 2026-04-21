@@ -90,6 +90,72 @@ export const devices = [
   },
 ];
 
+export const projects = [
+  {
+    id: "project-a",
+    name: "Berlin Edge Rollout",
+    description: "Retail edge racks, compact switching, and branch firewalls.",
+    rackCount: 2,
+    deviceCatalogCount: devices.length,
+    racks: [
+      {
+        id: "berlin-edge-rack-42",
+        name: "Primary Edge Rack",
+        templateKey: "rack-42u",
+        heightU: 42,
+      },
+      {
+        id: "berlin-edge-rack-20",
+        name: "Security Rack",
+        templateKey: "rack-20u",
+        heightU: 20,
+      },
+    ],
+  },
+  {
+    id: "project-b",
+    name: "Campus Network Refresh",
+    description: "Core distribution upgrade across teaching blocks and labs.",
+    rackCount: 2,
+    deviceCatalogCount: devices.length,
+    racks: [
+      {
+        id: "campus-core-rack-42",
+        name: "Core Distribution Rack",
+        templateKey: "rack-42u",
+        heightU: 42,
+      },
+      {
+        id: "campus-lab-rack-20",
+        name: "Lab Network Rack",
+        templateKey: "rack-20u",
+        heightU: 20,
+      },
+    ],
+  },
+  {
+    id: "project-c",
+    name: "QA Lab Expansion",
+    description: "Test racks for staging servers, patching, and power validation.",
+    rackCount: 2,
+    deviceCatalogCount: devices.length,
+    racks: [
+      {
+        id: "qa-lab-rack-42",
+        name: "Validation Rack",
+        templateKey: "rack-42u",
+        heightU: 42,
+      },
+      {
+        id: "qa-power-rack-20",
+        name: "Power and Patch Rack",
+        templateKey: "rack-20u",
+        heightU: 20,
+      },
+    ],
+  },
+];
+
 export const rackDocument = {
   rackId: "rack-main",
   revisionId: 1,

@@ -1,19 +1,16 @@
-import { useEffect } from "react";
-
 import type { DeviceTemplateConfig } from "@repo/config";
 import { AppShell } from "@repo/ui";
 
-import { CollaborationPanel } from "../components/CollaborationPanel";
-import { DeviceFrame } from "../components/DeviceFrame";
-import { RackDragOverlay } from "../components/RackDragOverlay";
-import { RackFramePanel } from "../components/RackFramePanel";
+import { CollaborationPanel } from "@features/board/CollaborationPanel";
+import { DeviceFrame } from "@features/rack/DeviceFrame";
+import { RackDragOverlay } from "@features/rack/RackDragOverlay";
+import { RackFramePanel } from "@features/rack/RackFramePanel";
 import {
   useDevicesQuery,
   useRackCollaborationConnection,
   useRackDocumentQuery,
   useRackPlacement,
-} from "../hooks";
-import { useRackInteractionStore } from "../stores/rackInteractionStore";
+} from "@hooks";
 
 const EMPTY_DEVICE_TEMPLATES: DeviceTemplateConfig[] = [];
 
@@ -30,17 +27,6 @@ export function AppFramePage() {
     initialDocument: rackDocumentQuery.data ?? null,
     templates,
   });
-
-  const theme = useRackInteractionStore((state) => state.interaction.theme);
-
-  useEffect(() => {
-    const root = document.documentElement;
-    if (theme === "light") {
-      root.classList.add("theme-light");
-    } else {
-      root.classList.remove("theme-light");
-    }
-  }, [theme]);
 
   return (
     <AppShell>

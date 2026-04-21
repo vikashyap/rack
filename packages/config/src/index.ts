@@ -8,3 +8,9 @@ export type {
   DeviceTemplateKey,
   DeviceTemplateProps,
 } from "./device-templates";
+export type {
+  RackTemplateComponent,
+  RackTemplateConfig,
+  RackTemplateKey,
+  RackTemplateProps,
+} from "./rack-templates";

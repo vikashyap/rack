@@ -1,10 +1,10 @@
 import { create } from "zustand";
 
-import type { RackDocumentOperation } from "../lib/rack-collaboration";
-import { sendRackDocumentOperation as emitRackDocumentOperation } from "../lib/rack-document-operations";
-import type { RackConnection, RackConnectionEndpoint } from "../lib/rack-wire";
-import type { RackDeviceRecord } from "../lib/rack-placement";
-import type { RackDocumentResponse } from "../lib/api";
+import type { RackDocumentOperation } from "@lib/rack-collaboration";
+import { sendRackDocumentOperation as emitRackDocumentOperation } from "@lib/rack-document-operations";
+import type { RackConnection, RackConnectionEndpoint } from "@lib/rack-wire";
+import type { RackDeviceRecord } from "@lib/rack-placement";
+import type { RackDocumentResponse } from "@lib/api";
 
 export type RackDocumentState = {
   rackId: string;

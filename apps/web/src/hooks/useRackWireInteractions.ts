@@ -1,8 +1,8 @@
 import type { PointerEvent } from "react";
 import { useShallow } from "zustand/react/shallow";
 
-import { getRackPortTarget, getRackSvgPoint } from "../lib/rack-wire";
-import { useRackInteractionStore } from "../stores/rackInteractionStore";
+import { getRackPortTarget, getRackSvgPoint } from "@lib/rack-wire";
+import { useRackInteractionStore } from "@stores/rackInteractionStore";
 
 export function useRackWireInteractions() {
   const {

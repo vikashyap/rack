@@ -19,6 +19,24 @@ export function fetchDevices() {
   return fetchJson<DeviceTemplateConfig[]>("/devices");
 }
 
+export type ProjectSummary = {
+  id: string;
+  name: string;
+  description: string;
+  rackCount: number;
+  deviceCatalogCount: number;
+  racks?: Array<{
+    id: string;
+    name: string;
+    templateKey: "rack-42u" | "rack-20u";
+    heightU: number;
+  }>;
+};
+
+export function fetchProjects() {
+  return fetchJson<ProjectSummary[]>("/projects");
+}
+
 export type RackDocumentResponse = {
   rackId: string;
   revisionId: number;

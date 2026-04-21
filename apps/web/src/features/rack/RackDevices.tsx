@@ -2,9 +2,9 @@ import { memo, type MouseEvent } from "react";
 
 import { DeviceTemplate } from "@repo/ui";
 
-import { useRackDrag } from "../hooks";
-import { getRackDeviceY, type RackDevice } from "../lib/rack-placement";
-import { useRackInteractionStore } from "../stores/rackInteractionStore";
+import { useRackDrag } from "@hooks";
+import { getRackDeviceY, type RackDevice } from "@lib/rack-placement";
+import { useRackInteractionStore } from "@stores/rackInteractionStore";
 
 interface RackDevicesProps {
   rackHeight: number;

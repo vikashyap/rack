@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-import type { RackCollaborator } from "../lib/rack-collaboration";
+import type { RackCollaborator } from "@lib/rack-collaboration";
 
 type RackPresenceStore = {
   users: RackCollaborator[];

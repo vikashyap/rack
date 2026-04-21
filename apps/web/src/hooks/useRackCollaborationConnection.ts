@@ -7,13 +7,13 @@ import {
   type RackDocumentOperation,
   type RackCollaborationMessage,
   type RackCollaborationStatus,
-} from "../lib/rack-collaboration";
+} from "@lib/rack-collaboration";
 import {
   runRemoteRackDocumentOperation,
   setRackDocumentOperationSender,
-} from "../lib/rack-document-operations";
-import { useRackDocumentStore } from "../stores/rackDocumentStore";
-import { useRackPresenceStore } from "../stores/rackPresenceStore";
+} from "@lib/rack-document-operations";
+import { useRackDocumentStore } from "@stores/rackDocumentStore";
+import { useRackPresenceStore } from "@stores/rackPresenceStore";
 
 function applyRemoteOperation(operation: RackDocumentOperation) {
   const documentStore = useRackDocumentStore.getState();

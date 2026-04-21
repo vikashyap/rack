@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { fetchDevices } from "../lib/api";
+import { fetchDevices } from "@lib/api";
 
 export const devicesQueryKey = ["devices"] as const;
 
