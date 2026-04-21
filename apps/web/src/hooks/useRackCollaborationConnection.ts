@@ -4,6 +4,7 @@ import {
   getBrowserRackSession,
   getRackCollaborationUrl,
   type RackCollaborationConnection,
+  type RackDocumentOperation,
   type RackCollaborationMessage,
   type RackCollaborationStatus,
 } from "../lib/rack-collaboration";
@@ -13,6 +14,54 @@ import {
 } from "../lib/rack-document-operations";
 import { useRackDocumentStore } from "../stores/rackDocumentStore";
 import { useRackPresenceStore } from "../stores/rackPresenceStore";
+
+function applyRemoteOperation(operation: RackDocumentOperation) {
+  const documentStore = useRackDocumentStore.getState();
+  const { rackId, revisionId } = documentStore.document;
+
+  if (operation.rackId !== rackId || operation.revisionId <= revisionId) {
+    return;
+  }
+
+  runRemoteRackDocumentOperation(() => {
+    if (operation.type === "device.added") {
+      documentStore.addDevice(operation.device, {
+        revisionId: operation.revisionId,
+      });
+      return;
+    }
+
+    if (operation.type === "device.moved") {
+      documentStore.updateDeviceStartU(operation.deviceId, operation.startU, {
+        revisionId: operation.revisionId,
+      });
+      return;
+    }
+
+    if (operation.type === "device.removed") {
+      documentStore.removeDevice(operation.deviceId, {
+        revisionId: operation.revisionId,
+      });
+      return;
+    }
+
+    if (operation.type === "connection.added") {
+      documentStore.connectPorts(
+        operation.connection.from,
+        operation.connection.to,
+        operation.connection.id,
+        {
+          revisionId: operation.revisionId,
+        },
+      );
+      return;
+    }
+
+    documentStore.removeConnection(operation.connectionId, {
+      revisionId: operation.revisionId,
+    });
+  });
+}
 
 export function useRackCollaborationConnection() {
   const session = useMemo(() => getBrowserRackSession(), []);
@@ -40,62 +89,7 @@ export function useRackCollaborationConnection() {
       }
 
       if (event.type === "operation") {
-        const documentStore = useRackDocumentStore.getState();
-        const {
-          rackId: currentRackId,
-          revisionId: currentRevisionId,
-        } = documentStore.document;
-
-        if (event.operation.rackId !== currentRackId) {
-          return;
-        }
-
-        if (event.operation.revisionId <= currentRevisionId) {
-          return;
-        }
-
-        runRemoteRackDocumentOperation(() => {
-          if (event.operation.type === "device.added") {
-            documentStore.addDevice(event.operation.device, {
-              revisionId: event.operation.revisionId,
-            });
-            return;
-          }
-
-          if (event.operation.type === "device.moved") {
-            documentStore.updateDeviceStartU(
-              event.operation.deviceId,
-              event.operation.startU,
-              {
-                revisionId: event.operation.revisionId,
-              },
-            );
-            return;
-          }
-
-          if (event.operation.type === "device.removed") {
-            documentStore.removeDevice(event.operation.deviceId, {
-              revisionId: event.operation.revisionId,
-            });
-            return;
-          }
-
-          if (event.operation.type === "connection.added") {
-            documentStore.connectPorts(
-              event.operation.connection.from,
-              event.operation.connection.to,
-              event.operation.connection.id,
-              {
-                revisionId: event.operation.revisionId,
-              },
-            );
-            return;
-          }
-
-          documentStore.removeConnection(event.operation.connectionId, {
-            revisionId: event.operation.revisionId,
-          });
-        });
+        applyRemoteOperation(event.operation);
       }
     });
 

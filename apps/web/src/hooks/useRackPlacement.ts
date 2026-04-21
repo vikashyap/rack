@@ -20,6 +20,21 @@ function isDefined<T>(value: T | null | undefined): value is T {
   return value !== null && value !== undefined;
 }
 
+function clearDeviceInteraction(deviceId: string) {
+  const interaction = useRackInteractionStore.getState();
+
+  if (
+    interaction.interaction.activeDrag?.kind === "rack-device" &&
+    interaction.interaction.activeDrag.id === deviceId
+  ) {
+    interaction.clearDrag();
+  }
+
+  if (interaction.interaction.activeConnection?.deviceId === deviceId) {
+    interaction.cancelConnection();
+  }
+}
+
 export function useRackPlacement({
   initialDocument,
   templates,
@@ -57,19 +72,7 @@ export function useRackPlacement({
 
   function removeDevice(deviceId: string) {
     removeDeviceFromDocument(deviceId);
-
-    const interaction = useRackInteractionStore.getState();
-
-    if (
-      interaction.interaction.activeDrag?.kind === "rack-device" &&
-      interaction.interaction.activeDrag.id === deviceId
-    ) {
-      interaction.clearDrag();
-    }
-
-    if (interaction.interaction.activeConnection?.deviceId === deviceId) {
-      interaction.cancelConnection();
-    }
+    clearDeviceInteraction(deviceId);
   }
 
   return {

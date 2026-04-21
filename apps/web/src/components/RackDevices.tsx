@@ -3,7 +3,7 @@ import { memo, type MouseEvent } from "react";
 import { DeviceTemplate } from "@repo/ui";
 
 import { useRackDrag } from "../hooks";
-import type { RackDevice } from "../lib/rack-placement";
+import { getRackDeviceY, type RackDevice } from "../lib/rack-placement";
 import { useRackInteractionStore } from "../stores/rackInteractionStore";
 
 interface RackDevicesProps {
@@ -33,7 +33,7 @@ const RackDeviceItem = memo(function RackDeviceItem({
   onRemoveDevice: (deviceId: string) => void;
 }) {
   const deviceWidth = width - railWidth * 2;
-  const y = (rackHeight - (device.startU + device.uHeight - 1)) * uHeight;
+  const y = getRackDeviceY(device.startU, device.uHeight, rackHeight, uHeight);
   const activeDrag = useRackInteractionStore((state) => state.interaction.activeDrag);
   const active = activeDrag?.kind === "rack-device" && activeDrag.id === device.id;
   const bind = useRackDrag(

@@ -5,7 +5,7 @@ import {
   resolveDevicePortLayout,
 } from "../../../../packages/device-templates/src/lib/device-port-layout";
 
-import type { RackDevice } from "./rack-placement";
+import { getRackDeviceY, type RackDevice } from "./rack-placement";
 
 export type RackConnectionEndpoint = {
   deviceId: string;
@@ -90,7 +90,10 @@ export function getRackDevicePortAnchor({
 
   return {
     x: railWidth + anchor.x + anchor.width / 2,
-    y: (rackHeight - (device.startU + device.uHeight - 1)) * uHeight + anchor.y + anchor.height / 2,
+    y:
+      getRackDeviceY(device.startU, device.uHeight, rackHeight, uHeight) +
+      anchor.y +
+      anchor.height / 2,
     width: anchor.width,
     height: anchor.height,
   };

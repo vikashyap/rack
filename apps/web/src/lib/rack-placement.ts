@@ -54,10 +54,11 @@ export function resolveRackDevices(
 
 export function getRackDeviceY(
   startU: number,
-  uHeight: number,
+  deviceHeightU: number,
   rackHeight: number,
+  unitHeight: number,
 ) {
-  return (rackHeight - (startU + uHeight - 1)) * uHeight;
+  return (rackHeight - (startU + deviceHeightU - 1)) * unitHeight;
 }
 
 export function getRackStartUFromPoint(point: { x: number; y: number }) {
