@@ -163,7 +163,7 @@ export const rackDocument = {
     {
       id: "rack-device-patch-panel-a",
       templateKey: "patch-panel-default",
-      startU: 10,
+      startU: 30,
       view: "front",
     },
   ],

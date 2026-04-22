@@ -19,6 +19,9 @@ importers:
       '@repo/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@repo/rack-templates':
+        specifier: workspace:*
+        version: link:../../packages/rack-templates
       '@repo/ui':
         specifier: workspace:*
         version: link:../../packages/ui

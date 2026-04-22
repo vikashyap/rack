@@ -25,7 +25,7 @@ export type ProjectSummary = {
   description: string;
   rackCount: number;
   deviceCatalogCount: number;
-  racks?: Array<{
+  racks: Array<{
     id: string;
     name: string;
     templateKey: "rack-42u" | "rack-20u";

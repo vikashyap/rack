@@ -7,6 +7,10 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
+      "@repo/rack-templates": path.resolve(
+        __dirname,
+        "../../packages/rack-templates/src/index.ts",
+      ),
       "@stores": path.resolve(__dirname, "./src/stores"),
       "@features": path.resolve(__dirname, "./src/features"),
       "@components": path.resolve(__dirname, "./src/components"),

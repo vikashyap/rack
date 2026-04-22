@@ -3,6 +3,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
+      "@repo/rack-templates": ["../../packages/rack-templates/src/index.ts"],
       "@stores": ["src/stores"],
       "@stores/*": ["src/stores/*"],
       "@features": ["src/features"],
@@ -21,4 +22,3 @@
   },
   "include": ["src"]
 }
-

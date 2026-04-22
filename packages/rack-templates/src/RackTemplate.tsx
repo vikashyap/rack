@@ -1,7 +1,7 @@
 import { lazy, Suspense, type ComponentPropsWithoutRef } from "react";
 
 import type { RackTemplateProps } from "@repo/config";
-import { rackTemplateLoaders } from "./rack-templates";
+import { rackTemplateLoaders } from "./loaders";
 
 export type {
   RackTemplateComponent,

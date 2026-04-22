@@ -4,11 +4,11 @@ export type RackTemplateLoader = () => Promise<{ default: RackTemplateComponent 
 
 export const rackTemplateLoaders = {
   "rack-42u": () =>
-    import("./Rack42Template").then((module) => ({
+    import("./rack-templates/Rack42Template").then((module) => ({
       default: module.Rack42Template,
     })),
   "rack-20u": () =>
-    import("./Rack20Template").then((module) => ({
+    import("./rack-templates/Rack20Template").then((module) => ({
       default: module.Rack20Template,
     })),
 } satisfies Record<RackTemplateKey, RackTemplateLoader>;

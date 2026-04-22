@@ -18,7 +18,6 @@ export { RackFrame } from "./RackFrame";
 export { ControlGroup } from "./ControlGroup";
 export { PageHeader } from "./PageHeader";
 export { Panel } from "./Panel";
-export { RackTemplate } from "./RackTemplate";
 export { ThemeToggle } from "./ThemeToggle";
 export type {
   DeviceCategory,
@@ -34,9 +33,3 @@ export type {
 export {
   DeviceTemplate,
 } from "./DeviceTemplate";
-export type {
-  RackTemplateComponent,
-  RackTemplateConfig,
-  RackTemplateKey,
-  RackTemplateProps,
-} from "./RackTemplate";
