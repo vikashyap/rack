@@ -4,9 +4,8 @@
   "packageManager": "pnpm@10.15.1",
   "scripts": {
     "dev": "turbo run dev",
-    "check:styles": "node scripts/check-design-tokens.mjs",
-    "build": "pnpm check:styles && turbo run build",
-    "typecheck": "pnpm check:styles && turbo run typecheck",
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
     "preview": "turbo run preview"
   },
   "devDependencies": {

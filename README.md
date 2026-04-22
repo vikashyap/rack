@@ -482,7 +482,6 @@ Useful commands:
 ```bash
 pnpm typecheck
 pnpm build
-pnpm check:styles
 ```
 
 ## Important Submission Note

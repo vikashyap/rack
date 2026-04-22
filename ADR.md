@@ -18,6 +18,11 @@ The goal is to explain:
 
 The scaffold intentionally demonstrates architecture and tradeoff thinking rather than a fully finished application.
 
+Chosen optional topics:
+
+- State Management
+- API Integration
+
 ## Required Topic 1: Rendering
 
 ### Decision
@@ -431,6 +436,8 @@ The scaffold needs to communicate a realistic frontend loading strategy:
 
 That structure is easier to cache and reason about than one oversized nested response.
 
+It also leaves a clean path toward a .NET-backed production API where contracts can be shared more formally through OpenAPI or generated client types.
+
 ### Intended route shape
 
 ```txt
@@ -441,6 +448,18 @@ GET /api/projects/:projectId/devices
 GET /api/racks/:rackId/document
 WS  /ws?projectId=...&rackId=...
 ```
+
+### Contract definition and typing
+
+The frontend is built around explicit request and response shapes rather than untyped `fetch` calls.
+
+That is useful now because:
+
+- the contract is easier to reason about in the scaffold
+- document shape and metadata shape stay explicit
+- frontend logic is easier to refactor safely
+
+It is also useful later because a .NET backend could expose OpenAPI contracts and the frontend could replace handwritten fetch helpers with generated request and response types without changing the architectural model.
 
 ### Why project scoping matters
 
@@ -458,6 +477,54 @@ During project creation, the user might select only:
 
 The frontend should operate inside that selected project scope rather than loading platform-wide data.
 
+### Error handling strategy
+
+The intended frontend error strategy is split by failure type:
+
+- metadata fetch failures
+  - show a query error state and allow retry
+- rack document validation failures
+  - keep the current client state visible and show an actionable message
+- revision conflicts
+  - refetch the latest rack document and let the user retry
+- websocket disconnects
+  - reconnect and resubscribe, then reconcile against the latest document revision
+
+This keeps transport errors, validation errors, and collaboration conflicts from being treated as the same kind of failure.
+
+### Caching and invalidation
+
+React Query is the intended cache boundary for server state.
+
+Typical cache keys would be:
+
+- `projects`
+- `project`, `projectId`
+- `project-racks`, `projectId`
+- `project-devices`, `projectId`
+- `rack-document`, `rackId`
+
+Invalidation strategy:
+
+- project metadata invalidates by `projectId`
+- rack metadata invalidates by `projectId`
+- rack document invalidates by `rackId`
+- accepted document mutations or confirmed websocket revisions invalidate or refresh the active rack document
+
+The important idea is that metadata and rack documents should not share the same invalidation boundary.
+
+### Pagination pattern
+
+Pagination is not important for the live rack document itself, but it matters for metadata collections.
+
+The intended rule is:
+
+- rack documents load as whole documents
+- large device catalogs use server-side search, filtering, and pagination
+- large rack metadata lists can also page if a project owns many racks
+
+That keeps the detailed editor simple while still acknowledging that project-scoped metadata can grow large.
+
 ### Template loading strategy
 
 The metadata can load first, while SVG template implementations resolve lazily only when needed.
@@ -467,7 +534,11 @@ That is why the scaffold uses:
 - metadata lists in the board and inventory
 - live template rendering only in active board nodes or rack scenes
 
-## Monorepo Tradeoff
+## Other Topics
+
+The following sections are not part of the five core assessment topics above, but they are included because they explain important architectural tradeoffs in the scaffold and help frame future evolution.
+
+### Monorepo Tradeoff
 
 ### Decision
 
@@ -506,7 +577,7 @@ The monorepo is not free:
 
 Even with those costs, it is the better fit for this assessment because the package structure is part of the architecture story itself.
 
-## Configuration And Theme Boundary
+### Configuration And Theme Boundary
 
 Configuration is not treated as live application state.
 
@@ -532,7 +603,7 @@ Theme also follows this boundary:
 
 That means theme changes do not require rewriting component class names.
 
-## Config Tradeoff
+### Config Tradeoff
 
 ### Decision
 
@@ -569,7 +640,7 @@ That is why the intended rule is:
 - config contains stable contracts and rule-like metadata
 - config does not become a dumping ground for live state or screen-specific behavior
 
-## Next-Step Evolution: Board SDK And Rack SDK
+### Next-Step Evolution: Board SDK And Rack SDK
 
 The current scaffold is still app-first, but one clear evolution path is to expose the board and rack features through more configurable React SDK-style boundaries.
 
