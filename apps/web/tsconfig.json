@@ -3,6 +3,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
+      "@repo/device-templates": ["../../packages/device-templates/src/index.ts"],
       "@repo/rack-templates": ["../../packages/rack-templates/src/index.ts"],
       "@stores": ["src/stores"],
       "@stores/*": ["src/stores/*"],

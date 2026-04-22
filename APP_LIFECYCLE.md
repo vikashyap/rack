@@ -1,20 +1,20 @@
 # App Lifecycle And Data Flow
 
-This document explains how data flows through the app from top to bottom:
+This document explains how data moves through the scaffold from top to bottom:
 
 1. project creation or selection
-2. project metadata loading
-3. project-scoped rack and device loading
-4. rack document loading
-5. device drag into a rack
+2. project-scoped metadata loading
+3. board-level rack placement
+4. detailed rack document loading
+5. drag and drop inside a rack
 6. websocket collaboration
-7. final persistence back to the server
+7. server persistence
 
-The goal is to make the IDs, routes, and JSON shapes easy to follow.
+The goal is to make the routes, IDs, JSON shapes, and store transformations easy to follow.
 
 ## 1. Top-Level Mental Model
 
-The app is built around a simple hierarchy:
+The system hierarchy is:
 
 ```txt
 Project
@@ -25,18 +25,24 @@ Project
 -> Connection
 ```
 
-Each level has its own job:
+Each level owns something different:
 
-- a `project` scopes which racks and device templates are available
-- a `board` shows project-level layout and rack placement
-- a `rack` owns the detailed document being edited
-- a `device` is a placed template inside a rack
-- a `port` is a connectable endpoint on a device
-- a `connection` links two ports together
+- `Project`
+  - defines scope
+- `Board`
+  - shows project-level rack placement
+- `Rack`
+  - owns the live editable document
+- `Device`
+  - occupies rows inside a rack
+- `Port`
+  - exposes a connectable endpoint
+- `Connection`
+  - links one port to another
 
-## 2. Main IDs Used In The System
+## 2. Main IDs In The System
 
-These IDs are the backbone of the whole flow:
+These IDs are the backbone of the flow:
 
 ```txt
 projectId
@@ -48,15 +54,22 @@ port.id
 templateKey
 ```
 
-They mean different things:
+Meaning:
 
-- `projectId` identifies the project context
-- `rackId` identifies the rack document being edited
-- `revisionId` identifies the current rack document version
-- `device.id` identifies one placed device record inside a rack
-- `connection.id` identifies one cable record
-- `port.id` identifies one port inside a template
-- `templateKey` identifies which SVG template to render
+- `projectId`
+  - identifies project scope
+- `rackId`
+  - identifies the rack document
+- `revisionId`
+  - identifies the rack document version
+- `device.id`
+  - identifies one placed device record
+- `connection.id`
+  - identifies one cable record
+- `port.id`
+  - identifies a port inside a template
+- `templateKey`
+  - identifies which SVG template to render
 
 Important rule:
 
@@ -65,23 +78,9 @@ id identifies a record
 templateKey identifies a visual template
 ```
 
-## 3. API Routes Used Today
+## 3. Intended API Shape
 
-The mock server currently exposes three main GET routes:
-
-```txt
-GET /api/projects
-GET /api/devices
-GET /api/rack-document
-```
-
-And one websocket endpoint:
-
-```txt
-GET /ws
-```
-
-In a production version, the same flow would usually become more scoped:
+The intended route model is:
 
 ```txt
 POST /api/projects
@@ -92,27 +91,25 @@ GET /api/racks/:rackId/document
 WS  /ws?projectId=...&rackId=...
 ```
 
-The scaffold keeps the routes simpler, but the data flow is already shaped for that future version.
+The current scaffold uses a simpler mock server, but the frontend architecture is organized around this scoped version.
 
 ## 4. Step 1: User Creates Or Selects A Project
 
-Before any rack data is loaded, the user either creates a project or selects an existing one.
+Before any rack document is loaded, the user either creates a project or selects an existing one.
 
-A simple example is:
+The platform may have a much larger inventory:
 
-- the full platform may contain `500` rack metadata records
-- the full platform may contain `4000` device metadata records
-- during project creation, the user may choose only `30` racks and `100` device metadata records for this project
+- `500` rack metadata records
+- `4000` device metadata records
+
+During project creation, the user might choose only:
+
+- `30` racks
+- `100` device metadata records
 
 That selected subset becomes the project scope.
 
-A production flow would usually start with:
-
-```txt
-POST /api/projects
-```
-
-Example create request:
+### Example project creation request
 
 ```json
 {
@@ -132,7 +129,7 @@ Example create request:
 }
 ```
 
-Example create response:
+### Example project creation response
 
 ```json
 {
@@ -140,73 +137,57 @@ Example create response:
   "name": "Berlin Edge Rollout",
   "description": "Retail edge racks, compact switching, and branch firewalls.",
   "rackCount": 30,
-  "deviceCatalogCount": 500
+  "deviceCatalogCount": 100
 }
 ```
 
-The important idea is that project creation selects a subset from the larger platform inventory.
+Important idea:
 
-For example:
-
-- the whole platform may contain hundreds of rack metadata records
-- the whole platform may contain thousands of device metadata records
-- project creation chooses only the racks and device metadata relevant to this project
-- the created project may end up with something smaller, such as `30` racks and `500` device metadata records
-
-That still does not mean the live rack editor loads all of that data at once.
-
-Instead:
-
-- project creation defines the project-scoped subset
-- project routes return metadata for that subset
-- the live board and rack editor boot from that scoped metadata
-- SVG template implementations resolve lazily only when the board or rack needs them
-
-The scaffold starts from the simpler version where projects already exist, so the first visible step is project selection.
+- the platform inventory is large
+- the project scope is a selected subset
+- the live tool should work inside that subset, not across the whole platform
 
 ## 5. Step 2: Home Page Loads Project Metadata
 
-The app starts on `HomePage`.
+The app starts by loading lightweight project metadata.
 
-The frontend calls:
+### Request
 
 ```txt
 GET /api/projects
 ```
 
-Example response:
+### Example response
 
 ```json
 [
   {
     "id": "project-a",
     "name": "Berlin Edge Rollout",
-    "description": "Retail edge racks, compact switching, and branch firewalls."
+    "description": "Retail edge racks, compact switching, and branch firewalls.",
+    "rackCount": 30,
+    "deviceCatalogCount": 100
   }
 ]
 ```
 
 At this stage:
 
-- the app only knows project metadata
-- no rack document is loaded yet
-- no devices are placed yet
-- the user is only choosing a project context
+- no rack document is loaded
+- no rack scene is rendered
+- the user is only choosing project scope
 
 ## 6. Step 3: User Opens A Project Board
 
-After the user clicks a project card, the route becomes:
+After selecting a project, the route becomes:
 
 ```txt
 /board/project-a
 ```
 
-The board page uses the selected `projectId` to load:
+The board uses the selected `projectId` to load project-scoped metadata.
 
-- which racks belong to the project
-- which device catalog belongs to the project
-
-In the intended backend shape, those are separate routes:
+### Requests
 
 ```txt
 GET /api/projects/project-a
@@ -214,7 +195,7 @@ GET /api/projects/project-a/racks
 GET /api/projects/project-a/devices
 ```
 
-Example project metadata response:
+### Example project metadata
 
 ```json
 {
@@ -222,11 +203,11 @@ Example project metadata response:
   "name": "Berlin Edge Rollout",
   "description": "Retail edge racks, compact switching, and branch firewalls.",
   "rackCount": 30,
-  "deviceCatalogCount": 500
+  "deviceCatalogCount": 100
 }
 ```
 
-Example rack metadata response:
+### Example rack metadata
 
 ```json
 [
@@ -245,16 +226,7 @@ Example rack metadata response:
 ]
 ```
 
-At this stage, the app is still dealing with project-scoped metadata, not full live rack documents.
-
-That distinction matters:
-
-- the platform owns the full rack and device inventory
-- project creation chooses a subset from that platform inventory
-- project routes return metadata for that selected subset
-- rack document routes return the live placed state for one selected rack
-
-Example device catalog response:
+### Example device metadata
 
 ```json
 [
@@ -287,75 +259,147 @@ Example device catalog response:
 
 At the board level:
 
-- racks can be placed on the board
-- devices are visible as project-scoped inventory
-- devices are not dropped onto the board itself
+- racks may be placed on the board
+- devices are shown as project-scoped inventory
+- devices are not dropped on the board background
 
-That rule is intentional:
+Rule:
 
 ```txt
 board accepts racks
 racks accept devices
 ```
 
-In other words, the better lifecycle is:
-
-```txt
-project metadata
-+ project racks
-+ project devices
-```
-
-not one large nested project payload.
-
 ## 7. Step 4: User Opens The Detailed Rack Workflow
 
-The detailed rack editor works from a rack document.
+The detailed rack editor works from one rack document.
 
-The frontend calls:
+### Request
 
 ```txt
-GET /api/rack-document
+GET /api/racks/rack-a01/document
 ```
 
-Example response:
+### Example response
 
 ```json
 {
-  "rackId": "rack-main",
-  "revisionId": 1,
+  "rackId": "rack-a01",
+  "revisionId": 12,
   "devices": [
-    {
-      "id": "rack-device-core-switch",
-      "templateKey": "switch-default",
-      "startU": 30,
-      "view": "front"
-    },
     {
       "id": "rack-device-app-server-01",
       "templateKey": "server-default",
       "startU": 4,
       "view": "front"
+    },
+    {
+      "id": "rack-device-core-switch",
+      "templateKey": "switch-default",
+      "startU": 30,
+      "view": "front"
     }
   ],
-  "connections": []
+  "connections": [
+    {
+      "id": "conn-001",
+      "from": {
+        "deviceId": "rack-device-app-server-01",
+        "portId": "eth-1"
+      },
+      "to": {
+        "deviceId": "rack-device-core-switch",
+        "portId": "eth-3"
+      }
+    }
+  ]
 }
 ```
 
-This response seeds the main synced document store.
+This response is the API document shape.
 
-At this point:
+## 8. Step 5: API Document Becomes Normalized Store State
 
-- `rackId` tells us which rack document we are editing
-- `revisionId` tells us which version of the document we are on
-- `devices` are compact placement records
-- `connections` are wire records
+The rack editor normalizes the API document into lookup-friendly store state.
 
-## 8. Step 5: How Device Templates Turn Into Rack Devices
+### API shape
 
-The rack document does not contain the full device template payload.
+```ts
+type RackDocumentResponse = {
+  rackId: string;
+  revisionId: number;
+  devices: RackDeviceRecord[];
+  connections: RackConnection[];
+};
+```
 
-It only contains the placed record:
+### Normalized store shape
+
+This matches the actual `rackDocumentStore` shape used in the app:
+
+```ts
+export type RackDocumentState = {
+  rackId: string;
+  revisionId: number;
+  deviceIds: string[];
+  devicesById: Record<string, RackDeviceRecord>;
+  connectionIds: string[];
+  connectionsById: Record<string, RackConnection>;
+};
+```
+
+### Example normalized result
+
+```json
+{
+  "rackId": "rack-a01",
+  "revisionId": 12,
+  "deviceIds": [
+    "rack-device-app-server-01",
+    "rack-device-core-switch"
+  ],
+  "devicesById": {
+    "rack-device-app-server-01": {
+      "id": "rack-device-app-server-01",
+      "templateKey": "server-default",
+      "startU": 4,
+      "view": "front"
+    },
+    "rack-device-core-switch": {
+      "id": "rack-device-core-switch",
+      "templateKey": "switch-default",
+      "startU": 30,
+      "view": "front"
+    }
+  },
+  "connectionIds": ["conn-001"],
+  "connectionsById": {
+    "conn-001": {
+      "id": "conn-001",
+      "from": {
+        "deviceId": "rack-device-app-server-01",
+        "portId": "eth-1"
+      },
+      "to": {
+        "deviceId": "rack-device-core-switch",
+        "portId": "eth-3"
+      }
+    }
+  }
+}
+```
+
+This normalized shape is useful because:
+
+- device lookup is cheap
+- connection lookup is cheap
+- updates can target one device or connection without scanning the whole array every time
+
+## 9. Step 6: Metadata Plus Record Becomes Rendered Device
+
+The rack document does not include the full device metadata object.
+
+The placed record:
 
 ```json
 {
@@ -366,7 +410,7 @@ It only contains the placed record:
 }
 ```
 
-The frontend combines that placed record with the device catalog entry:
+is combined with project-scoped device metadata:
 
 ```json
 {
@@ -377,31 +421,25 @@ The frontend combines that placed record with the device catalog entry:
   "uHeight": 1,
   "ports": [
     { "id": "eth-1", "type": "ethernet" },
-    { "id": "eth-2", "type": "ethernet" },
-    { "id": "mgmt-1", "type": "console" }
+    { "id": "eth-2", "type": "ethernet" }
   ]
 }
 ```
 
-That merge gives the renderer enough information to draw the device:
+That combination gives the renderer enough information to produce the final SVG:
 
 ```txt
-placed device record
-+ template config
+placed record
++ template metadata
++ template implementation
 = rendered rack device
 ```
 
-This is why `templateKey` matters so much. The same placed record can be rendered correctly whether it came from:
+## 10. Step 7: Dragging A Device Into A Rack
 
-- initial API load
-- local drag and drop
-- websocket replay
+The inventory drag payload is intentionally small.
 
-## 9. Step 6: User Drags A Device Into A Rack
-
-The drag starts from an inventory item.
-
-The inventory-side drag payload is intentionally small:
+### Drag payload
 
 ```json
 {
@@ -410,322 +448,104 @@ The inventory-side drag payload is intentionally small:
 }
 ```
 
-That `id` is the catalog item ID, not the final placed device ID.
-
-When the user drops it into the rack, the UI resolves the inventory item into a placed record:
+On drop, the client converts that metadata item into a placed rack record:
 
 ```json
 {
-  "id": "rack-device-server-003",
+  "id": "rack-device-app-server-02",
   "templateKey": "server-default",
   "startU": 10,
   "view": "front"
 }
 ```
 
-That placed record is then inserted into the rack document state.
+Then the document store updates.
 
-So the local flow is:
+## 11. Step 8: Local Mutation Becomes A Websocket Operation
 
-```txt
-inventory item
--> resolve template
--> calculate startU
--> create placed device record
--> update rack document store
-```
+The client applies the edit optimistically, then emits a committed operation.
 
-## 10. Step 7: User Connects Two Ports
-
-Connections are stored with device IDs and port IDs, not pixel coordinates.
-
-Example:
+### Example websocket document operation
 
 ```json
 {
-  "id": "conn-002",
-  "from": {
-    "deviceId": "rack-device-app-server-01",
-    "portId": "eth-1"
-  },
-  "to": {
-    "deviceId": "rack-device-core-switch",
-    "portId": "eth-4"
-  }
-}
-```
-
-That is important because the backend does not need to know SVG positions.
-
-The frontend derives the wire path from:
-
-- the device placement
-- the template port definitions
-- the current rack layout rules
-
-So the backend stores logical relationships:
-
-```txt
-this port is connected to that port
-```
-
-and the frontend calculates:
-
-```txt
-where those ports appear on screen
-```
-
-## 11. Step 8: Presence Over Websocket
-
-While a user is dragging, we do not send the whole rack document.
-
-We send temporary presence data over websocket.
-
-Example presence message:
-
-```json
-{
-  "type": "presence",
-  "pointer": {
-    "x": 612,
-    "y": 284,
+  "type": "device.added",
+  "rackId": "rack-a01",
+  "revisionId": 13,
+  "device": {
+    "id": "rack-device-app-server-02",
+    "templateKey": "server-default",
+    "startU": 10,
     "view": "front"
-  },
-  "dragPreview": {
-    "name": "Server (1U)",
-    "heightU": 1,
-    "startU": 10,
-    "view": "front",
-    "isValid": true
   }
 }
 ```
 
-This is not persisted.
+This is different from presence updates.
 
-It is only for live collaboration UI:
-
-- remote pointers
-- remote drag previews
-- awareness of what another user is doing right now
-
-This belongs to the presence layer, not the document layer.
-
-## 12. Step 9: Committed Rack Changes Over Websocket
-
-After a user finishes a real edit, the app sends a typed operation.
-
-Example:
+### Presence update example
 
 ```json
 {
-  "type": "operation",
-  "operation": {
-    "type": "device.added",
-    "rackId": "rack-main",
-    "revisionId": 2,
-    "device": {
-      "id": "rack-device-server-003",
-      "templateKey": "server-default",
-      "startU": 10,
-      "view": "front"
-    }
+  "type": "presence.updated",
+  "projectId": "project-a",
+  "rackId": "rack-a01",
+  "userId": "user-2",
+  "pointer": {
+    "x": 420,
+    "y": 812
   }
 }
 ```
 
-Other clients receive that operation and replay it into their own rack document store.
-
-That means the shared model is:
+Important separation:
 
 ```txt
-presence for temporary actions
-operations for committed document changes
+presence = temporary
+document operations = committed
 ```
 
-## 13. Step 10: Final Push Back To The Server
+## 12. Step 9: Server Persists And Rebroadcasts
 
-The mock server currently rebroadcasts websocket operations but does not persist writes yet.
+The intended persistence flow is:
 
-The intended production flow is:
+1. client applies change locally
+2. client sends typed operation
+3. server validates against `revisionId`
+4. server persists the new document state
+5. server rebroadcasts the accepted operation
 
-1. user commits an edit locally
-2. local UI updates optimistically
-3. app sends a typed rack operation with `rackId` and `revisionId`
-4. backend validates the operation
-5. backend persists the new rack document state
-6. backend increments the `revisionId`
-7. backend rebroadcasts the confirmed operation
+If the client is stale, the server can reject the write based on revision mismatch.
 
-Example operation sent for persistence:
+### Example accepted response shape
 
 ```json
 {
-  "type": "device.moved",
-  "rackId": "rack-main",
-  "revisionId": 3,
-  "deviceId": "rack-device-core-switch",
-  "startU": 28
+  "status": "accepted",
+  "rackId": "rack-a01",
+  "revisionId": 13
 }
 ```
 
-In a full API design, that would likely become a route such as:
-
-```txt
-POST /api/racks/rack-main/operations
-```
-
-with a request body like:
+### Example conflict response shape
 
 ```json
 {
-  "revisionId": 3,
-  "operation": {
-    "type": "device.moved",
-    "deviceId": "rack-device-core-switch",
-    "startU": 28
-  }
+  "status": "conflict",
+  "rackId": "rack-a01",
+  "expectedRevisionId": 13,
+  "receivedRevisionId": 12
 }
 ```
 
-## 14. Why `revisionId` Matters
+## 13. Why This Flow Matters
 
-`revisionId` is the lightweight conflict model for the rack document.
+This structure keeps the layers clear:
 
-Simple example:
-
-```txt
-User A opens rack-main at revision 3
-User B opens rack-main at revision 3
-```
-
-User A moves a device first:
-
-```json
-{
-  "type": "device.moved",
-  "rackId": "rack-main",
-  "revisionId": 4,
-  "deviceId": "rack-device-core-switch",
-  "startU": 28
-}
-```
-
-Now the document version is newer.
-
-If User B tries to commit an older change based on the stale version, the backend can reject it and ask the client to refresh.
-
-That means:
-
-```txt
-presence can be frequent and temporary
-document writes must be version-aware
-```
-
-## 15. Full Lifecycle In One Example
-
-Here is the complete flow in one short story.
-
-### A. User creates or selects a project
-
-```txt
-GET /api/projects
--> project-a selected
-```
-
-### B. Board loads project metadata, project racks, and project devices
-
-```txt
-GET /api/projects/project-a
-GET /api/projects/project-a/racks
-GET /api/projects/project-a/devices
-```
-
-### C. User opens the rack editor for one rack
-
-```txt
-GET /api/racks/rack-main/document
-```
-
-### D. User drags a server from inventory into the rack
-
-Input drag payload:
-
-```json
-{
-  "kind": "template",
-  "id": "server-1u"
-}
-```
-
-Resolved placed record:
-
-```json
-{
-  "id": "rack-device-server-003",
-  "templateKey": "server-default",
-  "startU": 10,
-  "view": "front"
-}
-```
-
-### E. Other users see the drag preview
-
-```json
-{
-  "type": "presence",
-  "pointer": { "x": 612, "y": 284, "view": "front" },
-  "dragPreview": {
-    "name": "Server (1U)",
-    "heightU": 1,
-    "startU": 10,
-    "view": "front",
-    "isValid": true
-  }
-}
-```
-
-### F. Drop is committed
-
-```json
-{
-  "type": "operation",
-  "operation": {
-    "type": "device.added",
-    "rackId": "rack-main",
-    "revisionId": 2,
-    "device": {
-      "id": "rack-device-server-003",
-      "templateKey": "server-default",
-      "startU": 10,
-      "view": "front"
-    }
-  }
-}
-```
-
-### G. Backend persists and rebroadcasts
-
-```txt
-operation accepted
-revisionId increments
-other clients replay the same operation
-```
-
-## 16. Final Summary
-
-The app follows one simple pattern from top to bottom:
-
-```txt
-project is created or selected
-project metadata loads first
-project racks and project devices load through separate routes
-board chooses rack context
-rack document stores placed records
-templateKey resolves SVG templates
-presence shows temporary live actions
-operations sync committed document changes
-server persistence finalizes the document
-```
-
-That is the core lifecycle of the current scaffold.
+- project scope decides what metadata is available
+- board shows project-level rack placement
+- rack document owns editable state
+- inventory metadata is lightweight
+- rendered templates load lazily
+- websocket presence stays separate from committed document operations
+- normalized store state keeps updates and lookups manageable

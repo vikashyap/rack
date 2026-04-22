@@ -1,7 +1,7 @@
 import { useMemo, type PointerEvent as ReactPointerEvent } from "react";
 
 import type { DeviceTemplateConfig } from "@repo/config";
-import { DeviceTemplate } from "@repo/ui";
+import { DeviceTemplate } from "@repo/device-templates";
 import { RackTemplate } from "@repo/rack-templates";
 
 import {

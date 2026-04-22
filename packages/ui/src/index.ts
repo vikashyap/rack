@@ -19,17 +19,3 @@ export { ControlGroup } from "./ControlGroup";
 export { PageHeader } from "./PageHeader";
 export { Panel } from "./Panel";
 export { ThemeToggle } from "./ThemeToggle";
-export type {
-  DeviceCategory,
-  DevicePortConfig,
-  DevicePortType,
-  DeviceTemplateClassNames,
-  DeviceTemplateComponent,
-  DeviceTemplateConfig,
-  DeviceTemplateKey,
-  DeviceTemplateProps,
-  DeviceTemplateRootProps,
-} from "./DeviceTemplate";
-export {
-  DeviceTemplate,
-} from "./DeviceTemplate";

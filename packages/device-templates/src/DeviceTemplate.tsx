@@ -1,7 +1,8 @@
 import { lazy, Suspense, type ComponentPropsWithoutRef } from "react";
-import { deviceTemplateLoaders } from "@repo/device-templates";
 
 import type { DeviceTemplateProps } from "@repo/config";
+
+import { deviceTemplateLoaders } from "./loaders";
 
 export type {
   DeviceCategory,
@@ -17,7 +18,10 @@ export type {
 export interface DeviceTemplateRootProps extends ComponentPropsWithoutRef<"g"> {}
 
 const lazyDeviceTemplateRegistry = Object.fromEntries(
-  Object.entries(deviceTemplateLoaders).map(([templateKey, loader]) => [templateKey, lazy(loader)]),
+  Object.entries(deviceTemplateLoaders).map(([templateKey, loader]) => [
+    templateKey,
+    lazy(loader),
+  ]),
 ) as {
   [TemplateKey in keyof typeof deviceTemplateLoaders]: ReturnType<typeof lazy>;
 };

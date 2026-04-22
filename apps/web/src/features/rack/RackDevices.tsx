@@ -1,6 +1,6 @@
 import { memo, type MouseEvent } from "react";
 
-import { DeviceTemplate } from "@repo/ui";
+import { DeviceTemplate } from "@repo/device-templates";
 
 import { useRackDrag } from "@hooks";
 import { getRackDeviceY, type RackDevice } from "@lib/rack-placement";

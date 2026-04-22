@@ -7,6 +7,10 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
+      "@repo/device-templates": path.resolve(
+        __dirname,
+        "../../packages/device-templates/src/index.ts",
+      ),
       "@repo/rack-templates": path.resolve(
         __dirname,
         "../../packages/rack-templates/src/index.ts",

@@ -6,7 +6,6 @@
   "exports": {
     ".": "./src/index.ts",
     "./app-shell": "./src/AppShell.tsx",
-    "./device-template": "./src/DeviceTemplate.tsx",
     "./rack-frame": "./src/RackFrame.tsx",
     "./panel": "./src/Panel.tsx",
     "./control-group": "./src/ControlGroup.tsx"
@@ -22,7 +21,6 @@
   },
   "dependencies": {
     "@repo/config": "workspace:*",
-    "@repo/device-templates": "workspace:*",
     "tailwind-merge": "^3.5.0"
   }
 }

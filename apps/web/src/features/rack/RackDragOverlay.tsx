@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { DeviceTemplate } from "@repo/ui";
+import { DeviceTemplate } from "@repo/device-templates";
 import { type DeviceTemplateConfig } from "@repo/config";
 import { useShallow } from "zustand/react/shallow";
 

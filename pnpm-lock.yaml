@@ -19,6 +19,9 @@ importers:
       '@repo/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@repo/device-templates':
+        specifier: workspace:*
+        version: link:../../packages/device-templates
       '@repo/rack-templates':
         specifier: workspace:*
         version: link:../../packages/rack-templates
@@ -137,9 +140,6 @@ importers:
       '@repo/config':
         specifier: workspace:*
         version: link:../config
-      '@repo/device-templates':
-        specifier: workspace:*
-        version: link:../device-templates
       react:
         specifier: ^19.0.0
         version: 19.1.1

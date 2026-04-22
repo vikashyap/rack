@@ -1,449 +1,382 @@
 # Pathfinder Web Rack View
 
-This repo is a scaffold for an interactive rack view inside Pathfinder Web. The goal of this README is to help a junior developer understand the app story, the data flow, and where the main workflow lives.
+This repository is a frontend architecture scaffold for an interactive rack view inside Pathfinder Web.
 
-## Big Picture
+It is not a finished product. The goal of the scaffold is to make the system shape easy to understand:
 
-Pathfinder Web manages physical infrastructure.
+- how project data enters the app
+- how rack and device metadata are loaded
+- how rack editing is modeled
+- how collaboration is separated from document state
+- where shared UI, config, and template code live
 
-- A company becomes a project.
-- A project owns a selected set of racks.
-- Each rack contains selected devices.
-- Devices expose ports.
-- Ports can be connected with cables.
+## What This Repo Is For
 
-In this scaffold:
+The take-home brief asked for:
 
-- `HomePage` explains project entry.
-- `BoardPage` explains project-level loading and multi-rack placement.
-- `RackPage` is the main detailed workflow.
+1. an ADR with tradeoff reasoning
+2. a scaffolded repo that reflects those decisions
+3. workflow documentation describing AI usage
 
-The real editing experience happens in `RackPage`.
+This repo is built to satisfy that goal, not to present a production-ready feature.
 
-## Why `HomePage` And `BoardPage` Exist
+The strongest implementation area is the detailed rack editing demo. The board experience exists to show how the product could scale upward to project selection, board placement, and eventually multi-rack workflows.
 
-These pages are here to explain the product shape before the detailed rack editor opens.
+## Product Mental Model
 
-- `HomePage` is the project chooser.
-- `BoardPage` shows how a selected project loads its racks and devices.
-- `BoardPage` also shows how multiple racks can exist in one workspace.
-
-The board is intentionally an overview. It is not the full rack editor. It exists so the user can understand:
-
-1. which project is active
-2. which racks belong to that project
-3. how racks are placed in a larger workspace
-
-## Project Story
-
-Assume the full platform has millions of rack records and a very large device catalog.
-
-We do not want to load all rack and device templates in the first JavaScript bundle.
-
-Instead, the workflow is:
-
-1. user creates or selects a project
-2. project creation selects the relevant racks and device metadata from the larger platform inventory
-3. project metadata loads first
-4. project racks load from a project-scoped racks route
-5. project devices load from a project-scoped devices route
-6. UI first works with lightweight metadata
-7. full template implementations load only when needed
-
-This keeps the initial load smaller and makes the app easier to scale.
-
-## Example: Project Payload
-
-This is the kind of lightweight project metadata the UI is built around:
-
-```json
-{
-  "id": "project-acme-berlin",
-  "name": "ACME Berlin DC",
-  "description": "Regional core and edge rollout for ACME Berlin.",
-  "rackCount": 30,
-  "deviceCatalogCount": 500
-}
-```
-
-The important idea is:
-
-- `id` identifies the record
-- `templateKey` identifies which SVG template to render
-
-After that, the app loads project-scoped resources from separate routes instead of one nested response.
-
-Example:
+The product hierarchy is:
 
 ```txt
+Project
+-> Board
+-> Rack
+-> Device
+-> Port
+-> Connection
+```
+
+Each level has a different responsibility:
+
+- `Project` scopes which racks and device metadata are available
+- `Board` is a project-level overview where racks can be placed
+- `Rack` is the detailed editing surface
+- `Device` is a placed piece of equipment inside a rack
+- `Port` is a connectable endpoint on a device
+- `Connection` links one port to another
+
+## Pages In This Scaffold
+
+There are three important app surfaces:
+
+- `HomePage`
+  - project selection
+- `BoardPage`
+  - project-scoped overview and rack placement
+- `rack-editor-demo`
+  - the current detailed rack editing workflow
+
+The detailed rack editor is where most of the real interaction work lives today.
+
+## Repo Structure
+
+```txt
+apps/
+  server/                mock API and websocket server
+  web/                   React application
+
+packages/
+  config/                shared config types and design tokens
+  ui/                    reusable primitives and compound UI components
+  device-templates/      device SVG template registry and loaders
+  rack-templates/        rack SVG template registry and loaders
+```
+
+### Important app areas
+
+```txt
+apps/web/src/pages
+  HomePage.tsx
+  BoardPage.tsx
+  AppFramePage.tsx
+
+apps/web/src/features/rack
+  detailed rack editor behavior
+
+apps/web/src/features/board
+  board placement behavior
+
+apps/web/src/stores
+  Zustand stores for document, interaction, viewport, presence, and theme state
+```
+
+## How Data Enters The UI
+
+The app intentionally separates metadata loading from live rack document loading.
+
+The intended backend shape is:
+
+```txt
+POST /api/projects
 GET /api/projects/:projectId
 GET /api/projects/:projectId/racks
 GET /api/projects/:projectId/devices
+GET /api/racks/:rackId/document
+WS  /ws?projectId=...&rackId=...
 ```
 
-Example rack metadata:
+The current scaffold uses simpler mock routes, but the frontend data flow is designed around the scoped version.
 
-```json
-[
-  {
-    "id": "rack-a01",
-    "name": "Core Rack A01",
-    "templateKey": "rack-42u",
-    "heightU": 42
-  },
-  {
-    "id": "rack-b07",
-    "name": "Edge Rack B07",
-    "templateKey": "rack-20u",
-    "heightU": 20
-  }
-]
-```
+### Why this matters
 
-That separation matters because project metadata, rack metadata, and device catalog data do not need the same loading or caching behavior.
+The platform may have a very large master inventory.
 
-It also supports a more realistic creation flow:
+For example:
 
-- the platform may contain a much larger master inventory of racks and devices
-- project creation chooses only the relevant subset for that project
-- the board and rack pages then load only the metadata they actually need
-- the live board resolves template implementations lazily instead of loading every template up front
+- the platform may know about `500` rack metadata records
+- the platform may know about `4000` device metadata records
 
-## Rack Document Story
-
-Once the user opens one rack, the detailed page works from a rack document.
+When a project is created, the user selects a subset from that larger inventory.
 
 Example:
 
-```json
-{
-  "rackId": "rack-a01",
-  "revisionId": 12,
-  "devices": [
-    {
-      "id": "device-srv-001",
-      "templateKey": "server-default",
-      "startU": 18,
-      "view": "front"
-    },
-    {
-      "id": "device-sw-001",
-      "templateKey": "switch-default",
-      "startU": 40,
-      "view": "front"
-    }
-  ],
-  "connections": [
-    {
-      "id": "conn-001",
-      "from": {
-        "deviceId": "device-srv-001",
-        "portId": "server-default-1"
-      },
-      "to": {
-        "deviceId": "device-sw-001",
-        "portId": "switch-default-3"
-      }
-    }
-  ]
-}
-```
+- `30` rack metadata records
+- `100` device metadata records
 
-This is the main workflow inside `RackPage`:
+That subset becomes the project scope.
 
-- render the selected rack
-- place devices into rack units
-- start a cable from one port
-- finish it on another port
-- sync updates with other users
+The live UI should not load every template implementation up front. It should:
 
-## How Templates Work
+1. load project metadata
+2. load project-scoped rack metadata
+3. load project-scoped device metadata
+4. lazy-load SVG template implementations only when they are actually rendered
 
-Template contracts and shared config live in `packages/config`.
+## Templates, Metadata, And Records
 
-Runtime template loading lives in separate UI/template packages:
+This repo distinguishes between three kinds of data:
 
-- `packages/device-templates` for device template loaders
-- `packages/ui` for rack template registry and reusable rack primitives
+### 1. Metadata
 
-The runtime pattern is simple:
+Metadata describes what can be used.
 
-- keep stable record IDs in state
-- use `templateKey` to resolve the correct SVG template
-- render the same way whether data came from API, drag-and-drop, or websocket replay
-
-Example:
+Example device metadata:
 
 ```json
 {
-  "id": "device-srv-001",
-  "templateKey": "server-default"
-}
-```
-
-This means:
-
-- `id` tells us which placed device we are dealing with
-- `templateKey` tells `DeviceTemplate.Auto` which SVG component to load
-
-## Where Rules And Config Live
-
-The project uses the word "config" in a specific way.
-
-Config is where shared rules and contracts live. It is not where live rack state lives.
-
-For example, `packages/config` owns things like:
-
-- template keys such as `server-default` and `rack-42u`
-- shared TypeScript types for device templates, rack templates, and ports
-- category and port metadata
-- design token definitions exposed to Tailwind
-
-That means config answers questions like:
-
-- what kinds of devices exist?
-- what port types exist?
-- what rack template keys are allowed?
-- what token names can UI primitives use?
-
-Application state answers different questions:
-
-- which project is open?
-- which rack document is active?
-- which devices are placed in this rack?
-- which collaborators are online?
-
-That split is intentional:
-
-- `packages/config` defines the stable rules
-- stores and API responses hold the changing data
-
-## How Theming Works
-
-Theming is shared, but it is also intentionally lightweight.
-
-The current setup is:
-
-1. `packages/config/tailwind.css` defines the design token contract.
-2. Tailwind maps those tokens into utility names like `bg-ui-surface-bg`, `border-ui-surface-border`, and `text-ui-text-strong`.
-3. UI primitives in `packages/ui` use those token-based utility classes instead of hard-coded colors.
-4. `themeStore` switches between dark and light token sets by toggling the `theme-light` class on the root document element.
-
-The important idea is that primitives do not know specific hex colors. They only know semantic tokens.
-
-So instead of writing:
-
-```txt
-bg-slate-900
-border-white/10
-text-white
-```
-
-the primitives use:
-
-```txt
-bg-ui-surface-bg
-border-ui-surface-border
-text-ui-text-strong
-```
-
-This makes theme changes easier because a new theme does not require rewriting component class names. We only need to provide different token values.
-
-## How Tailwind Fits Into The Theme System
-
-Tailwind is not used here as an open-ended color picker.
-
-Instead, Tailwind is being used as a token consumer.
-
-The important piece is the `@theme inline` block in [tailwind.css](/Users/vikashyap/projects/rack/packages/config/tailwind.css). It maps CSS custom properties into Tailwind utilities:
-
-- `--ui-surface-bg` becomes `bg-ui-surface-bg`
-- `--ui-surface-border` becomes `border-ui-surface-border`
-- `--ui-text-strong` becomes `text-ui-text-strong`
-- spacing, radius, shadow, and text sizes are also mapped the same way
-
-Then the base layer defines actual token values for:
-
-- dark theme in `:root`
-- light theme in `.theme-light`
-- device-category overrides such as `[data-category="server"]`
-
-This gives us a clean chain:
-
-```txt
-theme class
--> CSS token values
--> Tailwind token utilities
--> shared UI primitives
--> app screens
-```
-
-In other words:
-
-- config owns the token names
-- Tailwind exposes them as utilities
-- primitives consume those utilities
-- the active theme swaps the values behind the tokens
-
-## How Ports Work
-
-Ports are not hard-coded inside page components. They are resolved from template config and used consistently by the rack wiring logic.
-
-Example device catalog entry:
-
-```json
-{
-  "id": "inventory-server-2u",
-  "name": "2U Server",
+  "id": "server-1u",
+  "name": "Server (1U)",
   "category": "server",
   "templateKey": "server-default",
-  "uHeight": 2,
+  "uHeight": 1,
   "ports": [
-    { "id": "server-default-1", "type": "ethernet" },
-    { "id": "server-default-2", "type": "ethernet" },
-    { "id": "server-default-3", "type": "power" }
+    { "id": "eth-1", "type": "ethernet" },
+    { "id": "eth-2", "type": "ethernet" },
+    { "id": "mgmt-1", "type": "console" }
   ]
 }
 ```
 
-The port flow is:
+### 2. Placed records
 
-1. server returns the template config
-2. template config defines the ports
-3. device template renders those ports
-4. wiring logic reads `deviceId` + `portId`
-5. connection state stores those endpoint IDs
+Placed records describe what is actually inside a rack.
 
-Example connection:
+Example rack device record:
 
 ```json
 {
-  "id": "conn-002",
-  "from": {
-    "deviceId": "device-srv-001",
-    "portId": "server-default-1"
-  },
-  "to": {
-    "deviceId": "device-sw-001",
-    "portId": "switch-default-5"
-  }
-}
-```
-
-## How Port And Wire Calculation Works
-
-The rack does not store hard-coded pixel coordinates for ports. It calculates them from a small layout config plus the current device placement.
-
-The calculation path is:
-
-1. `resolveTemplatePorts` gets the list of ports from the device template config.
-2. `resolveDevicePortLayout` uses a small category-based layout spec to decide:
-   - how many ports to show
-   - horizontal gap between ports
-   - port size
-   - starting X offset
-   - port Y position
-3. `resolveDevicePortAnchor` finds the exact port anchor inside the device.
-4. `getRackDevicePortAnchor` converts that local anchor into rack-level SVG coordinates.
-5. `buildRackWirePath` builds a cubic bezier curve between the two anchors.
-
-The layout config is intentionally small. For example, device categories like `server`, `switch`, and `patch-panel` each have different values for:
-
-- `rackCount`
-- `compactCount`
-- `rackGap`
-- `compactGap`
-- `startXOffset`
-
-That gives us consistent port placement without hard-coding every device by hand.
-
-The final wire path is also simple by design:
-
-- start at the source port anchor
-- end at the destination port anchor
-- place the bezier control point farther to the right so the cable bends smoothly
-
-This is enough for the challenge because it keeps the wiring logic readable and reusable.
-
-## Drag, Drop, And Realtime Sync
-
-The same ID philosophy is reused across the whole app.
-
-### From catalog drag
-
-```json
-{
-  "kind": "template",
-  "id": "inventory-server-2u"
-}
-```
-
-On drop, that catalog item becomes a placed device record:
-
-```json
-{
-  "id": "device-srv-002",
+  "id": "rack-device-app-server-01",
   "templateKey": "server-default",
-  "startU": 10,
+  "startU": 4,
   "view": "front"
 }
 ```
 
-### From websocket sync
+### 3. Rendered templates
 
-```json
-{
-  "type": "device.added",
-  "rackId": "rack-a01",
-  "revisionId": 13,
-  "device": {
-    "id": "device-srv-002",
-    "templateKey": "server-default",
-    "startU": 10,
-    "view": "front"
-  }
-}
+Rendered templates are SVG implementations loaded through registries.
+
+The important rule is:
+
+```txt
+id identifies a record
+templateKey identifies a template implementation
 ```
 
-The important part is that the render system does not care whether the record came from:
+That is why the same placed record can be rendered correctly whether it came from:
 
-- initial API load
-- local drag-and-drop
+- API load
+- drag and drop
 - websocket replay
 
-It resolves the same way every time:
+## Where Config Lives
 
-1. get the record by `id`
-2. use `templateKey` to resolve the template
-3. render the SVG
+`packages/config` defines stable contracts and rule-like metadata.
 
-## Where State Lives
+Examples:
 
-The app keeps different concerns in different stores:
+- rack template keys
+- device template keys
+- port and category types
+- shared TypeScript contracts
+- design token names for styling
 
-- `rackDocumentStore` for devices, connections, rack ID, and revision ID
-- `rackInteractionStore` for drag state, preview state, active connection, and current view
-- `boardViewportStore` for zoom
-- `rackPresenceStore` for collaborators
-- `themeStore` for theme
+Config is not the same thing as live state.
 
-This split matters because drag state changes often, while document state is the thing we sync and persist.
+Config answers:
 
-## Folder Guide
+- what kinds of things exist?
+- what template keys are valid?
+- what token names can primitives use?
 
-- `apps/web` is the React app
-- `apps/server` is the mock backend
-- `packages/ui` contains reusable UI pieces
-- `packages/config` contains shared types and design tokens
-- `packages/device-templates` contains device template loaders
+Live application state answers:
+
+- which project is selected?
+- which rack is open?
+- which devices are placed?
+- which connections exist?
+- which collaborators are online?
+
+That split is intentional because config changes more slowly than live rack data.
+
+## Theme System
+
+Theming is handled through design tokens, not hard-coded component colors.
+
+Current approach:
+
+1. `packages/config/tailwind.css` defines token names
+2. Tailwind maps those tokens into semantic utilities
+3. primitives in `packages/ui` use semantic classes
+4. `themeStore` toggles the active theme by switching the root theme class
+
+So instead of writing raw classes like:
+
+```txt
+bg-slate-900
+text-white
+border-white/10
+```
+
+the primitives use semantic classes like:
+
+```txt
+bg-ui-surface-bg
+text-ui-text-strong
+border-ui-surface-border
+```
+
+This makes theme changes cheaper because the component API stays stable while the token values change underneath it.
+
+## Compound UI Components
+
+The UI package uses compound component patterns where composition is easier to read than many flat props.
+
+Examples:
+
+- `Panel`
+- `ControlGroup`
+- `RackFrame`
+
+That lets the page read like composition:
+
+```tsx
+<RackFrame.Canvas>
+  <RackFrame.Background />
+  <RackFrame.Rails />
+  <RackFrame.Markers />
+</RackFrame.Canvas>
+```
+
+instead of pushing many structural props through several intermediary components.
+
+This helps reduce prop drilling for presentational concerns and keeps the rack scene structure understandable.
+
+## State Management
+
+The app uses separate Zustand stores because the state has different lifetimes and update frequencies.
+
+Current boundaries:
+
+- `rackDocumentStore`
+  - synced rack data
+- `rackInteractionStore`
+  - drag state, preview state, active connection, current view
+- `boardViewportStore`
+  - board zoom
+- `rackPresenceStore`
+  - collaborator presence and pointer state
+- `themeStore`
+  - active theme
+
+### Why this helps
+
+The editor is layered:
+
+- rack frame layer
+- device layer
+- wire layer
+- presence layer
+- overlay and preview layer
+
+Those layers should not all rerender for the same reason.
+
+The intended rule is:
+
+- document updates rerender document-driven layers
+- presence updates rerender presence-driven layers
+- viewport updates rerender viewport-driven surfaces
+
+That boundary is one of the reasons Zustand is useful here. Components can subscribe to narrow slices instead of receiving one large app state object.
+
+## Inventory Vs Live Rendering
+
+The scaffold now uses a deliberate split:
+
+```txt
+Inventory = metadata list
+Rack = real template rendering
+```
+
+That means:
+
+- the inventory shows lightweight metadata
+- the rack scene renders real SVG templates
+- template implementations boot when the live rack actually needs them
+
+This supports larger project-scoped catalogs better than rendering every template in the inventory list.
+
+## Collaboration Model
+
+The rack editor separates:
+
+- ephemeral presence state
+- committed document state
+
+### Presence state
+
+Examples:
+
+- pointer position
+- drag preview
+- active collaborator list
+
+This is high-frequency and should not mutate the rack document.
+
+### Document state
+
+Examples:
+
+- device added
+- device moved
+- connection added
+- connection removed
+
+These are committed changes that can be replayed and persisted.
+
+The current mental model is:
+
+1. apply locally for responsiveness
+2. emit a typed operation
+3. validate and persist on the server
+4. replay the confirmed change remotely
+
+## How To Read The Code
 
 Good starting points:
 
-- [BoardPage.tsx](/Users/vikashyap/projects/rack/apps/web/src/pages/BoardPage.tsx)
-- [RackPage.tsx](/Users/vikashyap/projects/rack/apps/web/src/pages/RackPage.tsx)
-- [RackScene.tsx](/Users/vikashyap/projects/rack/apps/web/src/features/rack/RackScene.tsx)
-- [rackDocumentStore.ts](/Users/vikashyap/projects/rack/apps/web/src/stores/rackDocumentStore.ts)
-- [rackInteractionStore.ts](/Users/vikashyap/projects/rack/apps/web/src/stores/rackInteractionStore.ts)
+- `apps/web/src/pages/HomePage.tsx`
+- `apps/web/src/pages/BoardPage.tsx`
+- `apps/web/src/pages/AppFramePage.tsx`
+- `apps/web/src/features/rack/RackScene.tsx`
+- `apps/web/src/stores/rackDocumentStore.ts`
+- `apps/web/src/stores/rackInteractionStore.ts`
+
+Read in this order:
+
+1. home and board pages to understand the product shape
+2. `rackDocumentStore` to understand synced data
+3. `rackInteractionStore` to understand editor interactions
+4. rack scene and rack feature files to understand rendering and editing
 
 ## Local Setup
 
@@ -452,24 +385,7 @@ pnpm install
 pnpm dev
 ```
 
-`pnpm dev` runs the workspace in development mode:
-
-- `apps/web` starts the Vite frontend
-- `apps/server` starts the mock API and websocket server on port `3001`
-
-The frontend proxies:
-
-- `/api` to `http://localhost:3001`
-- `/ws` to `ws://localhost:3001`
-
-After starting the app, open the local Vite URL shown in the terminal. From there:
-
-1. open the home page
-2. choose a project
-3. inspect the project board
-4. open the detailed rack workflow
-
-Other useful commands:
+Useful commands:
 
 ```bash
 pnpm typecheck
@@ -477,14 +393,29 @@ pnpm build
 pnpm check:styles
 ```
 
-## Final Notes
+## Important Submission Note
 
-- Keep `id` and `templateKey` mentally separate.
-- `id` identifies the record.
-- `templateKey` selects the SVG template.
-- `RackPage` is the main workflow.
-- `HomePage` and `BoardPage` are here to explain project context and loading strategy.
+This scaffold is not being presented as production-ready code.
 
-- `ADR.md` explains the architecture decisions.
-- `APP_LIFECYCLE.md` explains the end-to-end data flow with routes, IDs, and JSON examples.
-- `AI_LOG.md` explains how AI was used.
+The rack editing demo is the strongest and most deliberate part of the implementation. That is the area where the reusable rendering structure and editing model are most mature.
+
+The board layer serves a different purpose:
+
+- it was built largely through AI-assisted prompting
+- it was then simplified and corrected manually
+- it exists to communicate product direction and loading strategy
+- it is not yet the final optimized production architecture
+
+So the right way to read this repo is:
+
+- the rack editor demo shows the stronger reusable interaction pattern
+- the board shows how that editor can fit into a broader product shell
+
+## Related Docs
+
+- `ADR.md`
+  - architecture decisions and tradeoffs
+- `APP_LIFECYCLE.md`
+  - end-to-end routes, IDs, JSON flow, and store normalization
+- `AI_LOG.md`
+  - how AI tools were used during the assessment
