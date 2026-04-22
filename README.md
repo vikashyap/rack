@@ -71,6 +71,19 @@ packages/
   rack-templates/        rack SVG template registry and loaders
 ```
 
+### Why a monorepo
+
+The scaffold uses a monorepo because the package boundaries are part of the architecture:
+
+- `config` defines the shared vocabulary
+- `ui` defines reusable primitives
+- `device-templates` and `rack-templates` define template-specific rendering
+- `apps/web` composes those pieces into product workflows
+
+This makes the relationships between shared contracts and app code easier to inspect in one place.
+
+The tradeoff is that workspace configuration is more involved and package boundaries need discipline. For this take-home, that tradeoff is worth it because the package structure itself is part of the explanation.
+
 ### Important app areas
 
 ```txt
@@ -188,6 +201,19 @@ That is why the same placed record can be rendered correctly whether it came fro
 - drag and drop
 - websocket replay
 
+SVG also helps the team workflow, not just the runtime rendering.
+
+Because rack and device visuals are template-driven, designers can hand off SVG-oriented artwork and developers can clean it up, wrap it as a template component, and register it with a `templateKey` without changing the main editor shell.
+
+That keeps small visual flows separated into reusable template areas:
+
+- rack templates
+- device templates
+- shared rack frame primitives
+- future port templates if the project evolves in that direction
+
+This is one of the reasons the template packages matter. Visual template work can move forward without every template adjustment becoming an application-level refactor.
+
 ## Where Config Lives
 
 `packages/config` defines stable contracts and rule-like metadata.
@@ -217,6 +243,72 @@ Live application state answers:
 - which collaborators are online?
 
 That split is intentional because config changes more slowly than live rack data.
+
+The tradeoff is that a config package can become too broad if it is not kept disciplined. The intended rule is:
+
+- config contains stable contracts and rule-like metadata
+- config does not contain live app state or screen-specific behavior
+
+## Next-Step Direction: Configurable SDK Boundaries
+
+One natural evolution from this scaffold is to treat the board and rack features more like reusable React SDK modules.
+
+That would mean:
+
+- a `Board SDK`
+  - receives board config
+  - receives a collaboration connection
+  - receives rack metadata to place on the board
+- a `Rack SDK`
+  - receives rack config
+  - receives rack document data
+  - receives rack-specific rules
+
+The current scaffold is not fully packaged that way yet, but the config boundary is moving in that direction.
+
+For example, a future board API could look like:
+
+```tsx
+<BoardSDK
+  config={boardConfig}
+  connection={webSocketConnection}
+  racks={projectRacks}
+/>
+```
+
+and each rack node could eventually be configured like:
+
+```tsx
+<RackSDK
+  config={rackConfig}
+  document={rackDocument}
+  rules={rackRules}
+/>
+```
+
+Example ideas for `boardConfig`:
+
+- board dimensions
+- allowed rack templates
+- zoom limits
+- placement rules
+- collaboration options
+
+Example ideas for `rackConfig`:
+
+- rack height
+- front/back views
+- allowed device categories
+- placement validation rules
+- connection validation rules
+
+The benefit of this direction is reusability:
+
+- the board can be embedded in different products with different rules
+- racks can be more configurable without rewriting the render system
+- websocket or collaboration adapters can be swapped more easily
+
+For now, those rules still mostly live in the app and config packages. The point is that the current structure gives a clear path toward more reusable SDK-style boundaries later.
 
 ## Theme System
 
